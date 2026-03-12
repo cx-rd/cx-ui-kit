@@ -1,5 +1,5 @@
 {
-  "name": "@shared/ui-kit",
+  "name": "@cx-rd/ui-kit",
   "version": "0.0.1",
   "peerDependencies": {
     "@angular/cdk": "^19.0.0",
