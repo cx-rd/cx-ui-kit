@@ -1,0 +1,299 @@
+@import '../../core/styles/globals/z-index';
+@import '../../core/styles/tokens/index';
+
+:host {
+  display: flex;
+  width: 100%;
+  height: 100vh;
+}
+
+.container * {
+  box-sizing: border-box;
+}
+
+.title,
+.description,
+.login-form label,
+.login-btn {
+  font-family: sans-serif;
+}
+
+h1 {
+  margin: 0;
+  padding: 0;
+}
+
+.container {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  background: radial-gradient(1200px 800px at 20% 30%,
+      rgba(207, 220, 255, 0.4),
+      rgba(207, 255, 253, 0.3) 55%,
+      $tp-color-gray-50 100%);
+
+  &::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background:
+      repeating-linear-gradient(to right,
+        rgba(64, 200, 190, 0.35) 0 1px,
+        transparent 1px 40px),
+      repeating-linear-gradient(to bottom,
+        rgba(64, 200, 190, 0.35) 0 1px,
+        transparent 1px 40px);
+
+    --baseOpacity: 0.55;
+    opacity: var(--baseOpacity);
+    -webkit-mask-image: linear-gradient(130deg,
+        rgba(0, 0, 0, 0) 0%,
+        rgba(0, 0, 0, 0) 30%,
+        rgba(0, 0, 0, 1) 48%,
+        rgba(0, 0, 0, 0.9) 58%,
+        rgba(0, 0, 0, 0) 78%,
+        rgba(0, 0, 0, 0) 100%);
+    mask-image: linear-gradient(130deg,
+        rgba(0, 0, 0, 0) 0%,
+        rgba(0, 0, 0, 0) 30%,
+        rgba(0, 0, 0, 1) 48%,
+        rgba(0, 0, 0, 0.9) 58%,
+        rgba(0, 0, 0, 0) 78%,
+        rgba(0, 0, 0, 0) 100%);
+
+    -webkit-mask-size: 55% 140%;
+    mask-size: 55% 140%;
+    -webkit-mask-repeat: no-repeat;
+    mask-repeat: no-repeat;
+
+    -webkit-mask-position: 120% 50%;
+    mask-position: 120% 50%;
+
+    animation: scanGridLeft 6s linear infinite;
+    will-change: -webkit-mask-position, mask-position, opacity;
+  }
+
+  .login-frame {
+    display: grid;
+    width: 320px;
+    min-height: 480px;
+    grid-template-rows:
+      auto auto auto 1fr;
+
+    row-gap: 10px;
+    align-items: start;
+    justify-items: center;
+    text-align: center;
+
+    padding: $tp-spacing-xl $tp-spacing-lg;
+    border-radius: $tp-card-radius-default;
+    border: 1px solid $tp-border-color;
+    background: linear-gradient(145deg, rgb(223, 255, 249)0%, rgb(255, 255, 255)20%);
+    box-shadow: $tp-shadow-xl;
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    z-index: $z-index-content;
+
+    img {
+      max-width: 80%;
+      height: auto;
+      object-fit: contain;
+      display: block;
+      user-select: none;
+      -webkit-user-drag: none;
+      margin-bottom: 10px;
+    }
+
+    .title {
+      display: block;
+      font-size: 28px;
+      font-weight: 700;
+      color: $tp-color-gray-800;
+      letter-spacing: 0.2px;
+      margin: 0;
+    }
+
+    .description {
+      font-size: 14px;
+      font-weight: 400;
+      color: $tp-color-secondary;
+      display: block;
+      margin-bottom: 20px;
+    }
+
+    .login-form {
+      display: grid;
+      width: 100%;
+      grid-auto-rows: min-content;
+      row-gap: 24px;
+      text-align: left;
+
+      .account,
+      .password {
+        display: grid;
+        grid-template-columns: 1fr auto;
+        grid-template-areas:
+          "label action"
+          "input input";
+        row-gap: 8px;
+        column-gap: 10px;
+
+        label {
+          grid-area: label;
+          font-size: 12px;
+          font-weight: 600;
+          letter-spacing: 0.2px;
+          color: $tp-color-secondary;
+        }
+
+        >span {
+          grid-area: action;
+          align-self: center;
+          font-size: 12px;
+          font-weight: 600;
+          color: $tp-color-primary;
+          cursor: pointer;
+          user-select: none;
+
+          &:hover {
+            text-decoration: underline;
+          }
+        }
+
+        input {
+          grid-area: input;
+          width: 100%;
+          height: 44px;
+          padding: 0 12px 0 14px;
+
+          border-radius: $tp-input-radius-default;
+          border: 1px solid $tp-border-color-dark;
+          background: rgba(255, 255, 255, 0.9);
+          outline: none;
+          color: $tp-color-secondary-dark;
+
+          transition:
+            border-color 160ms ease,
+            box-shadow 160ms ease,
+            background 160ms ease;
+
+          &::placeholder {
+            color: rgba(15, 23, 42, 0.4);
+            font-weight: 300;
+          }
+
+          &:focus {
+            border-color: $tp-color-primary;
+            box-shadow: $tp-shadow-focus;
+            background: #fff;
+          }
+
+          &:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+            background: rgba(248, 250, 252, 0.9);
+          }
+        }
+      }
+
+      .login-btn {
+        margin-top: 8px;
+        height: $tp-btn-height-md;
+        border: 0;
+        border-radius: $tp-btn-radius;
+
+        background: $tp-color-gray-800;
+        color: $tp-color-white;
+        font-size: $tp-btn-font-size;
+        font-weight: 650;
+        letter-spacing: 0.4px;
+
+        cursor: pointer;
+
+        display: flex;
+        align-items: center;
+        justify-content: center;
+
+        transition:
+          transform 120ms ease,
+          box-shadow 160ms ease,
+          opacity 160ms ease;
+
+        &:hover:not(:disabled) {
+          transform: translateY(-1px);
+          box-shadow: $tp-shadow-md;
+        }
+
+        &:active:not(:disabled) {
+          transform: translateY(0);
+          opacity: 0.95;
+          box-shadow: $tp-shadow-sm;
+        }
+
+        &:disabled {
+          cursor: not-allowed;
+          opacity: 0.55;
+          transform: none;
+          box-shadow: none;
+        }
+      }
+
+      input.ng-invalid.ng-touched {
+        border-color: $tp-color-error;
+        box-shadow: 0 0 0 2px rgba($tp-color-error, 0.12);
+      }
+
+      input.ng-valid.ng-touched {
+        border-color: $tp-color-success;
+      }
+    }
+  }
+}
+
+@keyframes scanGridLeft {
+  0% {
+    -webkit-mask-position: 120% 50%;
+    mask-position: 120% 50%;
+    opacity: 0;
+  }
+
+  6% {
+    opacity: 1;
+  }
+
+  90% {
+    opacity: 1;
+  }
+
+  100% {
+    -webkit-mask-position: -20% 50%;
+    mask-position: -20% 50%;
+    opacity: 0;
+  }
+}
+
+@media (max-width: 420px) {
+  .container {
+    padding: 36px 14px;
+
+    .login-frame {
+      width: 100%;
+      padding: 18px 16px 16px;
+
+      >img {
+        width: 170px;
+        height: 44px;
+      }
+
+      >.title {
+        font-size: 24px;
+      }
+    }
+  }
+}

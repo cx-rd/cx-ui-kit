@@ -1,0 +1,147 @@
+@import '../../core/styles/tokens/index';
+
+.user-menu-container {
+    width: 240px;
+    background: $tp-color-white;
+    border-radius: $tp-card-radius-default;
+    box-shadow: $tp-shadow-xl;
+    border: 1px solid $tp-border-color;
+    overflow: visible; // Allow arrow to peek out
+    display: flex;
+    flex-direction: column;
+    animation: menuFadeIn 0.2s ease-out;
+    position: relative;
+    margin-top: 10px; // Space for the arrow
+
+    .popover-arrow {
+        position: absolute;
+        top: -10px;
+        right: 20px; // Position near the avatar trigger
+        width: 0;
+        height: 0;
+        border-left: 10px solid transparent;
+        border-right: 10px solid transparent;
+        border-bottom: 10px solid $tp-color-white;
+        filter: drop-shadow(0 -1px 0 $tp-border-color); // Optional: add subtle border to arrow
+    }
+
+    .menu-header {
+        position: relative;
+        z-index: 1;
+        background: $tp-color-white;
+        border-radius: $tp-card-radius-default $tp-card-radius-default 0 0;
+        padding: $tp-spacing-md;
+        display: flex;
+        align-items: center;
+        gap: $tp-spacing-md;
+        border-bottom: 1px solid $tp-border-color;
+
+        .avatar-container {
+            width: 40px;
+            height: 40px;
+            border-radius: $tp-radius-full;
+            background: $tp-color-gray-100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+
+            .avatar {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+            .avatar-placeholder {
+                font-size: 32px;
+                color: $tp-color-secondary;
+            }
+        }
+
+        .user-details {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+
+            .user-name {
+                font-size: 20px;
+                font-weight: 700;
+                color: $tp-color-secondary-dark;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                margin-bottom: 2px;
+            }
+
+            .user-email {
+                font-size: 13px;
+                font-weight: 400;
+                color: $tp-color-secondary;
+                white-space: nowrap;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                font-family: 'Roboto Mono', monospace;
+                letter-spacing: 0.02em;
+                opacity: 0.8;
+            }
+        }
+    }
+
+    .menu-body {
+        padding: $tp-spacing-xs 0;
+        border-bottom: 1px solid $tp-border-color;
+    }
+
+    .menu-footer {
+        padding: $tp-spacing-xs 0;
+    }
+
+    .menu-item {
+        display: flex;
+        align-items: center;
+        padding: $tp-spacing-sm $tp-spacing-md;
+        gap: $tp-spacing-md;
+        cursor: pointer;
+        transition: background 0.2s;
+
+        &:hover {
+            background: $tp-color-gray-50;
+        }
+
+        .item-icon {
+            font-size: 20px;
+            color: $tp-color-secondary;
+            width: 24px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .item-label {
+            font-size: 14px;
+            color: $tp-color-secondary;
+            flex: 1;
+        }
+
+        &.logout-item {
+            .logout-icon {
+                color: $tp-color-error;
+            }
+
+            &:hover {
+                background: rgba($tp-color-error, 0.05);
+            }
+        }
+    }
+}
+
+@keyframes menuFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

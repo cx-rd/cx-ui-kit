@@ -1,0 +1,33 @@
+/**
+ * UI-kit Color Tokens
+ */
+
+// 1. Semantic Palette
+$tp-color-primary: #19b7a1 !default; // Mint
+$tp-color-primary-dark: #00695c !default;
+$tp-color-primary-light: #f0fdfa !default;
+
+$tp-color-secondary: #64748b !default; // Slate
+$tp-color-secondary-dark: #1e293b !default;
+$tp-color-secondary-light: #f1f5f9 !default;
+
+$tp-color-success: #10b981 !default;
+$tp-color-warning: #f59e0b !default;
+$tp-color-error: #ef4444 !default;
+
+// 2. Neutral Palette
+$tp-color-white: #ffffff !default;
+$tp-color-black: #000000 !default;
+$tp-color-gray-50: #f8fafc !default;
+$tp-color-gray-100: #f1f5f9 !default;
+$tp-color-gray-200: #e2e8f0 !default;
+$tp-color-gray-800: #1e293b !default;
+
+// 3. Application Backgrounds
+$tp-bg-main: $tp-color-white !default;
+$tp-bg-sidebar: $tp-color-white !default;
+$tp-bg-toolbar: $tp-color-white !default;
+
+// 4. Border Colors
+$tp-border-color: #f0f0f0 !default;
+$tp-border-color-dark: #e2e8f0 !default;

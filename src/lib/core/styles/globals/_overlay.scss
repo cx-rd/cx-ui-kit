@@ -1,0 +1,92 @@
+@import './z-index';
+
+/**
+ * Isolated Overlay Panel Classes for UI-kit
+ * 
+ * Rules:
+ * 1. Used with cdkConnectedOverlayPanelClass.
+ * 2. Isolates UI-kit styles from global CDK/Material overlays.
+ */
+
+.tp-ui-overlay-pane {
+    z-index: $z-index-overlay;
+    pointer-events: auto;
+    outline: none;
+}
+
+.tp-ui-flyout {
+    background: $tp-color-white;
+    box-shadow: $tp-shadow-flyout;
+    border-radius: $tp-radius-md;
+    border: 1px solid $tp-color-gray-200;
+    padding: 0; // Padding handled by panel
+    width: 100px;
+    animation: flyoutFadeIn 0.2s ease-out;
+
+    .flyout-panel {
+        display: block;
+        width: 100%;
+        padding: $tp-spacing-sm 0;
+        box-sizing: border-box;
+    }
+
+    .flyout-header {
+        display: block;
+        width: 100%;
+        box-sizing: border-box;
+        padding: $tp-spacing-xs $tp-spacing-md;
+        font-size: 11px;
+        font-weight: 700;
+        color: $tp-color-secondary;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        border-bottom: 1px solid $tp-color-gray-100;
+        margin-bottom: $tp-spacing-xs;
+    }
+
+    .flyout-content {
+        display: block;
+        width: 100%;
+
+        .sub-nav-item {
+            display: block; // Fill width
+            width: 100%;
+            box-sizing: border-box;
+            padding: 10px $tp-spacing-md;
+            font-size: 14px;
+            color: $tp-color-secondary;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            margin: 0; // No margin to ensure background fills
+
+            &:hover {
+                color: $tp-color-primary-dark;
+                background: $tp-color-primary-light;
+                font-weight: 500;
+            }
+
+            &.active {
+                color: $tp-color-primary-dark;
+                font-weight: 700;
+                background: $tp-color-primary-light;
+            }
+        }
+    }
+}
+
+.tp-ui-backdrop {
+    z-index: $z-index-scrim;
+}
+
+@keyframes flyoutFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}

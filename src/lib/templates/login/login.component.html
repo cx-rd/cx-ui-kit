@@ -1,0 +1,31 @@
+<div class="container">
+  <div class="login-frame">
+    <!-- Note: logo path might need adjustment based on final project structure -->
+    <img src="assets/Logo_eng.svg"/>
+    <h1 class="title">Welcome Back</h1>
+    <span class="description">Please enter your detail to sign in</span>
+
+    <form
+      class="login-form"
+      [formGroup]="form"
+      (ngSubmit)="login()"
+    >
+      <div class="account">
+        <label>Account</label>
+        <input type="text" placeholder="Enter your account" formControlName="account" />
+      </div>
+
+      <div class="password">
+        <label>Password</label>
+        <span>Forgot?</span>
+        <input
+          type="password"
+          placeholder="Enter your password"
+          formControlName="password"
+        />
+      </div>
+
+      <button class="login-btn" type="submit" [disabled]="form.invalid">Sign In ⭢</button>
+    </form>
+  </div>
+</div>

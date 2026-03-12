@@ -1,0 +1,15 @@
+/**
+ * UI-kit Shadow Tokens
+ */
+
+$tp-shadow-none: none !default;
+
+$tp-shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05) !default;
+$tp-shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06) !default;
+$tp-shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !default;
+$tp-shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04) !default;
+
+$tp-shadow-flyout: 0 4px 12px rgba(0, 0, 0, 0.15) !default;
+
+// Focus Ring
+$tp-shadow-focus: 0 0 0 4px rgba(25, 183, 161, 0.1) !default;

@@ -1,0 +1,20 @@
+<div class="notification-preview tp-ui-overlay-pane" *ngIf="notification">
+    <div class="preview-header">
+        <span class="material-icons icon-type" [class.alert]="notification.type === 'alert'"
+            [class.update]="notification.type === 'update'">
+            {{ notification.type === 'alert' ? 'report' : 'info' }}
+        </span>
+        <span class="type-label">{{ notification.type === 'alert' ? 'System Alert' : 'Project Update' }}</span>
+    </div>
+
+    <h2 class="preview-title">{{ notification.title }}</h2>
+
+    <div class="preview-body">
+        <div *ngIf="notification.imageUrl" class="preview-image">
+            <img [src]="notification.imageUrl" alt="Preview">
+        </div>
+        <div class="preview-summary">
+            <p>{{ notification.summary }}</p>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,240 @@
+@import '../../core/styles/tokens/index';
+
+.all-notifications-container {
+    padding: 0; // Remove container-level padding to allow sticky flush
+    background: $tp-color-white;
+    min-height: 100%;
+    width: 100%;
+
+    .page-header {
+        position: sticky;
+        top: 0;
+        background: $tp-color-white;
+        z-index: 10;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: $tp-spacing-xl;
+        border-bottom: 2px solid $tp-color-gray-100;
+        padding: $tp-spacing-xl $tp-spacing-xl $tp-spacing-md $tp-spacing-xl;
+
+        .page-title {
+            font-size: 32px;
+            font-weight: 800;
+            color: $tp-color-secondary-dark;
+            font-family: monospace;
+            margin: 0;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: $tp-spacing-md;
+
+            .icon-btn {
+                background: none;
+                border: none;
+                cursor: pointer;
+                color: $tp-color-secondary;
+                padding: 4px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border-radius: 4px;
+                transition: all 0.2s;
+
+                &:hover {
+                    background: $tp-color-gray-100;
+                    color: $tp-color-secondary-dark;
+                }
+
+                .material-icons {
+                    font-size: 24px;
+                }
+            }
+        }
+    }
+
+    .filter-tabs {
+        position: sticky;
+        top: 84px; // Below header (approx height of header with padding)
+        background: $tp-color-white;
+        z-index: 9;
+        display: flex;
+        gap: $tp-spacing-md;
+        margin-bottom: $tp-spacing-xl;
+        padding: $tp-spacing-sm $tp-spacing-xl;
+
+        .tab-btn {
+            padding: 6px 16px;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            color: $tp-color-secondary;
+            border-radius: 4px;
+            transition: all 0.2s;
+            font-family: monospace;
+
+            &:hover {
+                background: $tp-color-gray-100;
+                color: $tp-color-secondary-dark;
+            }
+
+            &.active {
+                background: #00d2be; // Teal from image
+                color: $tp-color-white;
+            }
+        }
+    }
+
+    .notifications-list {
+        display: flex;
+        flex-direction: column;
+        gap: $tp-spacing-xl;
+        padding: 0 $tp-spacing-xl $tp-spacing-xl $tp-spacing-xl;
+
+        .notification-card {
+            border: 1px solid $tp-color-gray-200;
+            border-radius: 4px;
+            background: $tp-color-white;
+            box-shadow: $tp-shadow-sm;
+            overflow: hidden;
+            transition: box-shadow 0.2s;
+
+            &:hover {
+                box-shadow: $tp-shadow-md;
+            }
+
+            &.unread {
+                border-left: 4px solid $tp-color-primary;
+            }
+
+            .card-header {
+                padding: $tp-spacing-md $tp-spacing-lg;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+
+                .header-left {
+                    display: flex;
+                    align-items: center;
+                    gap: $tp-spacing-md;
+
+                    .icon-type {
+                        font-size: 24px;
+                        border-radius: 50%;
+                        color: $tp-color-white;
+                        padding: 4px;
+
+                        &.alert {
+                            background: $tp-color-error;
+                        }
+
+                        &.update {
+                            background: #007bff;
+                        }
+                    }
+
+                    .type-label {
+                        font-size: 14px;
+                        font-weight: 700;
+                        color: $tp-color-secondary-dark;
+                        font-family: monospace;
+                    }
+                }
+
+                .header-right {
+                    display: flex;
+                    align-items: center;
+                    gap: $tp-spacing-md;
+
+                    .time {
+                        font-size: 13px;
+                        color: $tp-color-secondary;
+                        font-family: monospace;
+                    }
+
+                    .icon-btn.small {
+                        background: none;
+                        border: none;
+                        cursor: pointer;
+                        color: $tp-color-secondary;
+                        padding: 2px;
+                        border-radius: 4px;
+
+                        &:hover {
+                            background: $tp-color-gray-100;
+                        }
+
+                        .material-icons {
+                            font-size: 20px;
+                        }
+                    }
+                }
+            }
+
+            .card-body {
+                padding: 0 $tp-spacing-lg $tp-spacing-lg $tp-spacing-lg;
+
+                .card-title {
+                    font-size: 24px;
+                    font-weight: 800;
+                    color: $tp-color-secondary-dark;
+                    margin: $tp-spacing-md 0 $tp-spacing-xs 0;
+                    font-family: monospace;
+                }
+
+                .sender-info {
+                    font-size: 13px;
+                    color: $tp-color-secondary;
+                    font-family: monospace;
+                    margin-bottom: $tp-spacing-md;
+
+                    .sender-label {
+                        opacity: 0.8;
+                    }
+
+                    .sender-name {
+                        font-weight: 700;
+                    }
+                }
+
+                .card-divider {
+                    border: none;
+                    border-top: 1px solid $tp-color-gray-100;
+                    margin-bottom: $tp-spacing-lg;
+                }
+
+                .card-content-wrapper {
+                    &.has-image {
+                        display: flex;
+                        gap: $tp-spacing-xl;
+                        align-items: flex-start;
+
+                        .content-image {
+                            flex-shrink: 0;
+                            width: 320px;
+                            border-radius: 4px;
+                            overflow: hidden;
+                            border: 1px solid $tp-color-gray-200;
+
+                            img {
+                                width: 100%;
+                                display: block;
+                            }
+                        }
+                    }
+
+                    .content-text {
+                        flex: 1;
+                        font-size: 15px;
+                        line-height: 1.6;
+                        color: $tp-color-secondary-dark;
+                        font-family: monospace;
+                    }
+                }
+            }
+        }
+    }
+}

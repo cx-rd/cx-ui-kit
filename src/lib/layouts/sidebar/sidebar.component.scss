@@ -1,0 +1,262 @@
+@import '../../core/styles/globals/z-index';
+@import '../../core/styles/tokens/index';
+
+:host {
+    display: block;
+    height: 100%;
+    font-size: 14px;
+    position: relative;
+    overflow: visible !important;
+}
+
+.sidebar-container {
+    width: $tp-sidebar-width-expanded;
+    height: 100%;
+    background: $tp-bg-sidebar;
+    border-right: $tp-sidebar-border;
+    display: flex;
+    flex-direction: column;
+    transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: visible !important;
+    position: relative;
+
+    &.collapsed {
+        width: $tp-sidebar-width-collapsed;
+    }
+
+    .header {
+        display: flex;
+        align-items: center;
+        padding: 0 20px;
+        height: 64px;
+        border-bottom: 1px solid #f0f0f0;
+        flex-shrink: 0;
+        gap: 12px;
+        white-space: nowrap;
+        overflow: hidden; // Header 保持裁切以維持收合美感
+
+        .menu-icon {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            color: $tp-color-secondary;
+            height: 24px;
+            width: 24px;
+
+            &:hover {
+                color: $tp-color-primary;
+            }
+
+            .material-icons {
+                font-size: 24px !important;
+                line-height: 1;
+            }
+
+            &.mobile-only {
+                display: none;
+            }
+        }
+
+        .product-name {
+            display: flex;
+            align-items: center;
+            font-weight: 600;
+            font-size: 16px;
+            color: #1e293b;
+            white-space: nowrap;
+            height: 100%;
+            line-height: 1;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .desktop-only {
+            display: none !important;
+        }
+
+        .mobile-only {
+            display: flex !important;
+        }
+    }
+
+    .nav-list {
+        flex: 1;
+        padding: 12px 0;
+        overflow-y: auto;
+        overflow-x: hidden;
+        position: relative;
+
+        .collapsed & {
+            overflow: visible !important; // 重要：收合時關閉裁切，允許 flyout 橫向彈出
+        }
+
+        .nav-item-wrapper {
+            position: relative;
+            padding: 0 8px;
+            margin-bottom: 8px; // 統一間距為 8px
+            overflow: visible !important;
+            z-index: $z-index-nav;
+
+            &.active-flyout {
+                z-index: $z-index-overlay + 10 !important; // 確保當前展開的 flyout 在最上層
+            }
+        }
+
+        // ... rest of file (omitted for brevity in replace_file_content tool call, but I'll provide the whole block)
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            padding: 12px;
+
+            .collapsed & {
+                justify-content: center;
+            }
+
+            border-radius: $tp-radius-md;
+            cursor: pointer;
+            color: $tp-color-secondary;
+            margin-bottom: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            border-left: 3px solid transparent;
+
+            &:hover {
+                background: $tp-color-primary-light;
+                color: $tp-color-primary;
+            }
+
+            &.group-expanded {
+                background: $tp-color-primary-light;
+                color: $tp-color-primary-dark;
+                font-weight: 600;
+                border-left-color: $tp-color-primary;
+                border-radius: $tp-radius-xs $tp-radius-md $tp-radius-md $tp-radius-xs;
+
+                .material-icons {
+                    color: $tp-color-primary-dark;
+                }
+            }
+
+            &.active {
+                background: linear-gradient(90deg, rgba(184, 210, 232, 0.6) 0%, rgba(167, 243, 208, 0.8) 100%);
+                color: $tp-color-primary-dark;
+                font-weight: 600;
+                border-left-color: $tp-color-primary;
+
+                .material-icons {
+                    color: $tp-color-primary-dark;
+                }
+            }
+
+            .material-icons {
+                font-size: 20px !important;
+                width: 20px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                transition: transform 0.3s;
+            }
+
+            .label {
+                margin-left: 12px;
+                flex: 1;
+                font-size: 14px !important;
+                white-space: nowrap;
+                flex-shrink: 0;
+            }
+
+            .arrow {
+                font-size: 18px !important;
+                transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+
+                &.rotated {
+                    transform: rotate(180deg);
+                }
+            }
+        }
+
+
+        .mini-label {
+            font-size: 10px !important;
+            text-align: center;
+            color: #64748b;
+            margin-top: -4px;
+            margin-bottom: 8px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            padding: 0 4px;
+        }
+
+        .sub-nav {
+            background: $tp-color-primary-light;
+            border-radius: 0 0 $tp-radius-md $tp-radius-md;
+            margin-left: 0;
+            display: grid;
+            grid-template-rows: 0fr;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+            visibility: hidden;
+            margin-top: 0;
+            margin-bottom: 0;
+
+            &.expanded {
+                grid-template-rows: 1fr;
+                visibility: visible;
+                margin-top: 0;
+                margin-bottom: 0;
+            }
+
+            .sub-nav-inner {
+                min-height: 0;
+                padding-bottom: 8px;
+            }
+
+            .sub-nav-item {
+                padding: 10px 12px 10px 44px;
+                font-size: 13px !important;
+                color: $tp-color-secondary;
+                cursor: pointer;
+                transition: all 0.2s;
+
+                &:hover {
+                    color: $tp-color-primary-dark;
+                    font-weight: 500;
+                }
+
+                &.active {
+                    color: $tp-color-primary-dark;
+                    font-weight: 700;
+                    border-radius: $tp-radius-sm;
+                }
+            }
+        }
+
+    }
+}
+
+// @keyframes and material-icons remain local as they are scoped or broad enough.
+@keyframes flyoutFadeIn {
+    from {
+        opacity: 0;
+        transform: translateX(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+.material-icons {
+    font-family: 'Material Icons' !important;
+    font-weight: normal;
+    font-style: normal;
+    font-size: 24px;
+    line-height: 1;
+    display: inline-block;
+    white-space: nowrap;
+    -webkit-font-smoothing: antialiased;
+}

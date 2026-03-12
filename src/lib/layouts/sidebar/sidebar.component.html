@@ -1,0 +1,58 @@
+<div class="sidebar-container" [class.collapsed]="isCollapsed()">
+    <div class="header">
+        <!-- Desktop Mode: Toggle Menu (Hidden on mobile) -->
+        <div class="menu-icon desktop-only" (click)="toggleSidebar()">
+            <span class="material-icons">menu</span>
+        </div>
+        <!-- Mobile Mode: Close Menu (Back Arrow) -->
+        <div class="menu-icon mobile-only" (click)="onClose()">
+            <span class="material-icons">arrow_back</span>
+        </div>
+        <span class="product-name" *ngIf="!isCollapsed()">{{ productName() }}</span>
+    </div>
+
+    <div class="nav-list">
+        <div *ngFor="let item of navItems()" class="nav-item-wrapper"
+            [class.active-flyout]="isCollapsed() && flyoutItem()?.label === item.label" (mouseleave)="hideFlyout()">
+            <!-- Main Item -->
+            <div class="nav-item" #origin="cdkOverlayOrigin" cdkOverlayOrigin [class.has-children]="item.children"
+                [class.group-expanded]="item.expanded" [class.active]="isActive(item) || isChildActive(item)"
+                (click)="selectItem(item)" (mouseenter)="showFlyout(item)"
+                [attr.title]="(isCollapsed() && !item.children) ? item.label : null">
+                <span class="material-icons">{{ item.icon }}</span>
+                <span class="label" *ngIf="!isCollapsed()">{{ item.label }}</span>
+                <span class="arrow material-icons" *ngIf="!isCollapsed() && item.children"
+                    [class.rotated]="item.expanded">
+                    expand_more
+                </span>
+            </div>
+
+            <!-- Sub Items (Expanded State) -->
+            <div class="sub-nav" *ngIf="!isCollapsed() && item.children" [class.expanded]="item.expanded">
+                <div class="sub-nav-inner">
+                    <div *ngFor="let sub of item.children" class="sub-nav-item" [class.active]="isActive(sub)"
+                        (click)="selectItem(sub)">
+                        {{ sub.label }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Flyout Panel (Collapsed State Hover - Using CDK Overlay) -->
+            <ng-template cdk-connected-overlay [cdkConnectedOverlayOrigin]="origin"
+                [cdkConnectedOverlayOpen]="isCollapsed() && flyoutItem()?.label === item.label"
+                [cdkConnectedOverlayPositions]="flyoutPositions"
+                [cdkConnectedOverlayPanelClass]="['tp-ui-overlay-pane', 'tp-ui-flyout']">
+                <div class="flyout-panel" (mouseleave)="hideFlyout()" (mouseenter)="showFlyout(item)">
+                    <div class="flyout-header">{{ item.label }}</div>
+                    <div class="flyout-content">
+                        <div *ngFor="let sub of item.children" class="sub-nav-item" [class.active]="isActive(sub)"
+                            (click)="selectItem(sub)">
+                            {{ sub.label }}
+                        </div>
+                    </div>
+                </div>
+            </ng-template>
+
+        </div>
+    </div>
+</div>

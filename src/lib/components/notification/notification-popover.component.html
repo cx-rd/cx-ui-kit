@@ -1,0 +1,47 @@
+<div class="notification-popover tp-ui-overlay-pane">
+    <div class="popover-arrow"></div>
+
+    <div class="popover-header">
+        <h2 class="title">Notifications</h2>
+        <span class="action-read" (click)="onMarkAllAsRead()">Mark all as read</span>
+    </div>
+
+    <div class="notification-list">
+        <div *ngFor="let item of notifications" class="notification-item" [class.unread]="!item.isRead"
+            (click)="onItemClick(item)">
+            <!-- (mouseenter)="onItemMouseEnter(item, $event)" (mouseleave)="onItemMouseLeave()" -->
+
+            <div class="item-icon-container">
+                <span class="material-icons icon-type" [class.alert]="item.type === 'alert'"
+                    [class.update]="item.type === 'update'">
+                    {{ item.type === 'alert' ? 'report' : 'info' }}
+                </span>
+            </div>
+
+            <div class="item-content">
+                <div class="item-meta">
+                    <span class="type-label">{{ item.type === 'alert' ? 'System Alert' : 'Project Update' }}</span>
+                    <div class="meta-right">
+                        <span class="time">{{ item.time | relativeTime }}</span>
+                        <div class="sender" *ngIf="item.sender">
+                            <span class="material-icons">person</span>
+                            <span>{{ item.sender }}</span>
+                        </div>
+                    </div>
+                </div>
+                <h3 class="item-title">{{ item.title }}</h3>
+
+                <div class="item-body-horizontal">
+                    <div *ngIf="item.imageUrl" class="item-image-side">
+                        <img [src]="item.imageUrl" alt="Preview">
+                    </div>
+                    <p class="item-summary">{{ item.summary }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="popover-footer">
+        <span class="view-all">View All Notifications ></span>
+    </div>
+</div>

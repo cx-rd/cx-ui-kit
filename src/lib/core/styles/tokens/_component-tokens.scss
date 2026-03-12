@@ -1,0 +1,19 @@
+@import './colors';
+@import './radius';
+@import './shadows';
+
+/**
+ * UI-kit Component Specific Tokens
+ */
+
+// Button Defaults
+$tp-btn-height-md: 40px !default;
+$tp-btn-padding-x-md: 16px !default;
+$tp-btn-radius: $tp-btn-radius-default !default;
+$tp-btn-font-size: 14px !default;
+
+// Sidebar Specific
+$tp-sidebar-bg: $tp-color-white !default;
+$tp-sidebar-border: 1px solid $tp-border-color !default;
+$tp-sidebar-item-active-bg: $tp-color-primary-light !default;
+$tp-sidebar-item-active-text: $tp-color-primary-dark !default;

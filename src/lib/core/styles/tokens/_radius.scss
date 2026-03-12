@@ -1,0 +1,18 @@
+/**
+ * UI-kit Border Radius Tokens
+ */
+
+$tp-radius-none: 0 !default;
+$tp-radius-xs: 2px !default;
+$tp-radius-sm: 4px !default;
+$tp-radius-md: 8px !default;
+$tp-radius-lg: 12px !default;
+$tp-radius-xl: 16px !default;
+$tp-radius-2xl: 24px !default;
+$tp-radius-full: 9999px !default;
+$tp-radius-circle: 50% !default;
+
+// Default Component Radii
+$tp-btn-radius-default: $tp-radius-md !default;
+$tp-card-radius-default: $tp-radius-lg !default;
+$tp-input-radius-default: $tp-radius-sm !default;

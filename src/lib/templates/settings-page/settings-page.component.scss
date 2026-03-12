@@ -1,0 +1,151 @@
+@import '../../core/styles/tokens/index';
+
+.settings-page {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    color: $tp-color-secondary-dark;
+    background-color: transparent;
+    padding: $tp-spacing-lg;
+
+    .settings-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: $tp-spacing-lg;
+        flex-shrink: 0;
+
+        .settings-title {
+            font-size: 28px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .save-button {
+            background: $tp-color-primary;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: $tp-radius-md;
+            font-weight: 600;
+            cursor: pointer;
+            transition: opacity 0.2s;
+
+            &:hover {
+                opacity: 0.9;
+            }
+        }
+    }
+
+    .settings-tabs {
+        display: flex;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        margin-bottom: $tp-spacing-lg;
+        gap: $tp-spacing-xl;
+        flex-shrink: 0;
+
+        .settings-tab {
+            padding: $tp-spacing-md 0;
+            cursor: pointer;
+            font-weight: 600;
+            color: $tp-color-secondary;
+            position: relative;
+            transition: color 0.2s;
+
+            &:hover {
+                color: $tp-color-secondary-dark;
+            }
+
+            &.active {
+                color: $tp-color-primary-dark;
+
+                &::after {
+                    content: '';
+                    position: absolute;
+                    bottom: -1px;
+                    left: 0;
+                    right: 0;
+                    height: 3px;
+                    background-color: $tp-color-primary;
+                    border-radius: 3px 3px 0 0;
+                }
+            }
+        }
+    }
+
+    .settings-layout {
+        display: grid;
+        grid-template-columns: 240px 1fr;
+        gap: $tp-spacing-lg;
+        flex: 1;
+        overflow: hidden;
+
+        .settings-sidebar {
+            display: flex;
+            flex-direction: column;
+            gap: $tp-spacing-xs;
+            overflow-y: auto;
+        }
+
+        .section-item {
+            display: flex;
+            align-items: center;
+            padding: $tp-spacing-md $tp-spacing-lg;
+            border-radius: $tp-radius-md;
+            cursor: pointer;
+            color: $tp-color-secondary;
+            transition: all 0.2s;
+            gap: $tp-spacing-md;
+
+            i {
+                font-size: 18px;
+            }
+
+            .section-label {
+                font-weight: 500;
+            }
+
+            &:hover {
+                background-color: rgba(0, 0, 0, 0);
+                color: $tp-color-secondary-dark;
+            }
+
+            &.active {
+                background: linear-gradient(145deg, rgb(234, 255, 242), rgb(239, 255, 250));
+                color: $tp-color-primary-dark;
+                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+                i {
+                    color: $tp-color-primary;
+                }
+            }
+        }
+
+        .settings-content {
+            background-color: white;
+            border-radius: $tp-radius-lg;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+            padding: $tp-spacing-xl;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto; // Content area must be scrollable
+            scroll-behavior: smooth;
+
+            .content-body {
+                display: flex;
+                flex-direction: column;
+
+                .sections-container {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 40px; // Clear gap between modular sections
+                    padding-bottom: 200px; // Allow last section to scroll up
+                }
+
+                .settings-section-item {
+                    scroll-margin-top: 20px;
+                }
+            }
+        }
+    }
+}

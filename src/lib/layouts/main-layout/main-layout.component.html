@@ -1,0 +1,18 @@
+<div class="layout-wrapper">
+    <div class="toolbar-slot">
+        <lib-toolbar [userInfo]="userInfo()" [customActions]="customUserActions()" [notifications]="notifications()"
+            (menuToggled)="toggleSidebar()">
+        </lib-toolbar>
+    </div>
+    <div class="main-content-area">
+        <div class="sidebar-slot" [class.collapsed]="isSidebarCollapsed()" [class.active-mobile]="isMobileMenuOpen()">
+            <lib-sidebar [productName]="productName()" [navItems]="navItems()" [isCollapsed]="isSidebarCollapsed()"
+                (toggle)="toggleSidebar()" (closeMenu)="closeMobileMenu()"></lib-sidebar>
+        </div>
+        <div class="content-body">
+            <!-- Mobile Backdrop inside content-body -->
+            <div class="mobile-backdrop" [class.visible]="isMobileMenuOpen()" (click)="closeMobileMenu()"></div>
+            <ng-content></ng-content>
+        </div>
+    </div>
+</div>

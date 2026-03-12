@@ -1,0 +1,19 @@
+/**
+ * Unified Z-Index Hierarchy (Design Tokens)
+ * 
+ * Rules:
+ * 1. Always use these tokens instead of magic numbers.
+ * 2. Each category has a reserved range of 100 (0-99).
+ * 3. Only allowed offsets are +0 (default), +10 (active/state), +20 (priority).
+ * 4. Mid-term goal: Overlays should use CDK Portals to escape local stacking contexts.
+ */
+
+$z-index-content: 0; // Base content layer, login frame
+$z-index-layout: 100; // Fixed Header, Toolbar, Sticky elements
+$z-index-nav: 200; // Sidebar items, inline side navigation
+$z-index-scrim: 1000; // Backdrops, screen masking
+$z-index-drawer: 1100; // Mobile drawer sidebar, side panels
+$z-index-overlay: 1200; // Dropdowns, flyouts, contextual menus
+$z-index-modal: 1300; // Modals, complex dialogs
+$z-index-tooltip: 1400; // Tooltips
+$z-index-toast: 1500; // Toasts, notifications, priority alerts

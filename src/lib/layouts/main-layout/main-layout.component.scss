@@ -1,0 +1,117 @@
+@import '../../core/styles/globals/z-index';
+@import '../../core/styles/tokens/index';
+
+:host {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+.layout-wrapper {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    justify-content: flex-start;
+    background: $tp-color-gray-50;
+
+    .toolbar-slot {
+        display: flex;
+        width: 100%;
+        height: $tp-toolbar-height;
+        position: relative;
+        z-index: $z-index-layout;
+    }
+
+    .main-content-area {
+        display: flex;
+        flex: 1;
+        justify-content: flex-start;
+        align-items: stretch;
+        overflow: hidden !important; // Changed from visible to ensure constraint
+        position: relative;
+        height: 0; // Flexbox trick
+        min-height: 0;
+
+        .sidebar-slot {
+            display: flex;
+            height: 100%;
+            flex-shrink: 0;
+            position: relative;
+            overflow: visible !important;
+            z-index: $z-index-nav; // Peer layering: ensure sidebar is above content-body
+        }
+
+        .content-body {
+            display: block; // Keep as block for child component host
+            flex: 1;
+            height: 100%;
+            background: $tp-bg-main;
+            border-radius: $tp-radius-md;
+            box-shadow: $tp-shadow-sm;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 0;
+            position: relative;
+            min-height: 0;
+            // z-index: 1 removed to avoid unnecessary stacking context
+
+            .mobile-backdrop {
+                display: block;
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                bottom: 0;
+                background: rgba(0, 0, 0, 0.4);
+                z-index: $z-index-scrim;
+                opacity: 0;
+                visibility: hidden;
+                transition: all 0.3s ease;
+                border-radius: 8px;
+
+                &.visible {
+                    opacity: 1;
+                    visibility: visible;
+                }
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar-slot {
+                position: absolute;
+                z-index: $z-index-drawer;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                width: 0;
+                background: #fff;
+                overflow: hidden;
+                opacity: 0;
+                visibility: hidden;
+                pointer-events: none;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                box-shadow: none;
+
+                &.active-mobile {
+                    width: 200px;
+                    opacity: 1;
+                    visibility: visible;
+                    pointer-events: auto;
+                    box-shadow: 10px 0 30px rgba(0, 0, 0, 0.2);
+                    overflow: visible !important;
+                }
+
+                lib-sidebar {
+                    display: block;
+                    width: 200px;
+                    height: 100%;
+
+                    ::ng-deep .sidebar-container {
+                        width: 100% !important;
+                    }
+                }
+            }
+        }
+    }
+}
