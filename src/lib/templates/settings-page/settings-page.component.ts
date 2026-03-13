@@ -46,18 +46,60 @@ export class SettingsPageComponent implements AfterViewInit, OnDestroy {
 
     private observer: IntersectionObserver | null = null;
     private isUserScrolling = true;
+    private lastEmittedId: string | null = null;
 
     constructor() {
+        // Effect to handle tab changes: Reset scroll position
+        effect(() => {
+            const tabId = this.activeTabId();
+            if (tabId) {
+                const scrollRoot = this.scrollContainer()?.nativeElement;
+                if (scrollRoot) {
+                    scrollRoot.scrollTop = 0;
+                }
+            }
+        });
+
+        // Effect to handle section changes: Focus and Observation
         effect(() => {
             const currentSections = this.sections();
             if (currentSections.length > 0) {
-                setTimeout(() => this.setupIntersectionObserver(), 100);
+                const currentId = this.activeSectionId();
+                const isValid = currentSections.some(s => s.id === currentId);
+
+                if (!currentId || !isValid) {
+                    this.emitSectionScroll(currentSections[0].id);
+                }
+                
+                // Allow view to render then setup observer and possibly scroll
+                setTimeout(() => {
+                    this.setupIntersectionObserver();
+                    
+                    // If we have a valid ID that didn't come from a scroll event (e.g., Refresh or Tab switch)
+                    // Trigger manual scroll to it
+                    const id = this.activeSectionId();
+                    if (id && id !== this.lastEmittedId && isValid) {
+                        this.scrollToSection(id);
+                    }
+                }, 100);
+            }
+        });
+
+        // Handle external section selection (Direct input change)
+        effect(() => {
+            const id = this.activeSectionId();
+            if (id && id !== this.lastEmittedId) {
+                const currentSections = this.sections();
+                if (currentSections.some(s => s.id === id)) {
+                    this.scrollToSection(id);
+                }
             }
         });
     }
 
     ngAfterViewInit() {
-        this.setupIntersectionObserver();
+        // Handled by effects mostly, but ensure observer is ready
+        setTimeout(() => this.setupIntersectionObserver(), 200);
     }
 
     ngOnDestroy() {
@@ -81,18 +123,17 @@ export class SettingsPageComponent implements AfterViewInit, OnDestroy {
 
         const options = {
             root: scrollRoot,
-            rootMargin: '0px 0px -70% 0px',
+            rootMargin: '-5% 0px -75% 0px',
             threshold: 0
         };
 
         this.observer = new IntersectionObserver((entries) => {
             if (!this.isUserScrolling) return;
 
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    this.sectionScroll.emit((entry.target as HTMLElement).id);
-                }
-            });
+            const intersectingEntry = entries.find(entry => entry.isIntersecting);
+            if (intersectingEntry) {
+                this.emitSectionScroll((intersectingEntry.target as HTMLElement).id);
+            }
         }, options);
 
         this.sections().forEach(section => {
@@ -101,6 +142,22 @@ export class SettingsPageComponent implements AfterViewInit, OnDestroy {
                 this.observer?.observe(element);
             }
         });
+
+        scrollRoot.addEventListener('scroll', () => {
+            if (!this.isUserScrolling) return;
+            
+            if (scrollRoot.scrollTop < 10) {
+                const firstSection = this.sections()[0];
+                if (firstSection && this.activeSectionId() !== firstSection.id) {
+                    this.emitSectionScroll(firstSection.id);
+                }
+            }
+        }, { passive: true });
+    }
+
+    private emitSectionScroll(id: string) {
+        this.lastEmittedId = id;
+        this.sectionScroll.emit(id);
     }
 
     selectTab(id: string) {
@@ -108,6 +165,7 @@ export class SettingsPageComponent implements AfterViewInit, OnDestroy {
     }
 
     handleSectionClick(id: string) {
+        this.lastEmittedId = id;
         this.sectionClick.emit(id);
         this.scrollToSection(id);
     }
@@ -134,9 +192,20 @@ export class SettingsPageComponent implements AfterViewInit, OnDestroy {
             behavior: 'smooth'
         });
 
+        let scrollTimeout: any;
+        const onScrollEnd = () => {
+            clearTimeout(scrollTimeout);
+            scrollTimeout = setTimeout(() => {
+                this.isUserScrolling = true;
+                scrollRoot.removeEventListener('scroll', onScrollEnd);
+            }, 100);
+        };
+        scrollRoot.addEventListener('scroll', onScrollEnd);
+        
         setTimeout(() => {
             this.isUserScrolling = true;
-        }, 800);
+            scrollRoot.removeEventListener('scroll', onScrollEnd);
+        }, 1000);
     }
 
     onSave() {

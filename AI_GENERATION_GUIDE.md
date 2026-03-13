@@ -1,11 +1,11 @@
 # AI Generation Rules (LLM Prompting Guide)
 
-This guide provides explicit instructions for LLMs generating code within the `@shared/ui-kit` library.
+This guide provides explicit instructions for LLMs generating code within the `@cx-rd/ui-kit` library.
 
 ---
 
 ## Rule 1: Page Generation Target
-When creating a "New Screen", ALWAYS place the output in `projects/shared/ui-kit/src/lib/templates/`.
+When creating a "New Screen", ALWAYS place the output in `projects/cx-rd/ui-kit/src/lib/templates/`.
 
 ## Rule 2: Component Naming
 LLMs MUST use the following naming convention to ensure consistency:

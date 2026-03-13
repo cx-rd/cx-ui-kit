@@ -1,35 +1,33 @@
-<div class="settings-section-card security-card">
-    <div class="section-header">
-        <span class="material-icons">security</span>
-        <h3>Security & Privacy</h3>
+<div class="section-header">
+    <span class="material-icons">security</span>
+    <h3>Security & Privacy</h3>
+</div>
+
+<div class="security-list">
+    <div class="security-item">
+        <div class="item-info">
+            <span class="label">Password</span>
+            <span class="value">Last changed 3 months ago</span>
+        </div>
+        <button class="btn-outline">Change Password</button>
     </div>
 
-    <div class="security-list">
-        <div class="security-item">
-            <div class="item-info">
-                <span class="label">Password</span>
-                <span class="value">Last changed 3 months ago</span>
-            </div>
-            <button class="btn-outline">Change Password</button>
+    <div class="security-item">
+        <div class="item-info">
+            <span class="label">Two-Factor Authentication</span>
+            <span class="value">Add an extra layer of security to your account</span>
         </div>
+        <div class="toggle-switch">
+            <input type="checkbox" id="2fa-toggle">
+            <label for="2fa-toggle"></label>
+        </div>
+    </div>
 
-        <div class="security-item">
-            <div class="item-info">
-                <span class="label">Two-Factor Authentication</span>
-                <span class="value">Add an extra layer of security to your account</span>
-            </div>
-            <div class="toggle-switch">
-                <input type="checkbox" id="2fa-toggle">
-                <label for="2fa-toggle"></label>
-            </div>
+    <div class="security-item">
+        <div class="item-info">
+            <span class="label">Session Management</span>
+            <span class="value">You are currently logged in on 3 devices</span>
         </div>
-
-        <div class="security-item">
-            <div class="item-info">
-                <span class="label">Session Management</span>
-                <span class="value">You are currently logged in on 3 devices</span>
-            </div>
-            <button class="btn-text">View Sessions</button>
-        </div>
+        <button class="btn-text">View Sessions</button>
     </div>
 </div>

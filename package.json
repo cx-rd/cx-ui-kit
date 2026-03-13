@@ -1,6 +1,6 @@
 {
   "name": "@cx-rd/ui-kit",
-  "version": "0.0.1",
+  "version": "0.0.3",
   "peerDependencies": {
     "@angular/cdk": "^19.0.0",
     "@angular/common": "^19.2.0",
@@ -10,5 +10,12 @@
   "dependencies": {
     "tslib": "^2.3.0"
   },
-  "sideEffects": false
+  "sideEffects": false,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cx-rd/cx-ui-kit.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com"
+  }
 }

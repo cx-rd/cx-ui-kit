@@ -1,65 +1,58 @@
-.notifications-card {
-    padding: 32px;
-    background: white;
-    border-radius: 12px;
-    border: 1px solid #e2e8f0;
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 32px;
+    color: #1e293b;
 
-    .section-header {
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        margin-bottom: 32px;
-        color: #1e293b;
-
-        .material-icons {
-            color: #3b82f6;
-        }
-
-        h3 {
-            margin: 0;
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
+    .material-icons {
+        color: #3b82f6;
     }
 
-    .notification-group {
-        margin-bottom: 32px;
+    h3 {
+        margin: 0;
+        font-size: 1.1rem;
+        font-weight: 600;
+    }
+}
 
-        &:last-child {
-            margin-bottom: 0;
-        }
+.notification-group {
+    margin-bottom: 32px;
 
-        .group-title {
-            font-size: 12px;
-            font-weight: 700;
-            text-transform: uppercase;
-            color: #94a3b8;
-            letter-spacing: 0.05em;
-            margin-bottom: 16px;
-        }
+    &:last-child {
+        margin-bottom: 0;
+    }
 
-        .setting-row {
+    .group-title {
+        font-size: 12px;
+        font-weight: 700;
+        text-transform: uppercase;
+        color: #94a3b8;
+        letter-spacing: 0.05em;
+        margin-bottom: 16px;
+    }
+
+    .setting-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 12px 0;
+        border-bottom: 1px solid #f8fafc;
+
+        .row-info {
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #f8fafc;
+            flex-direction: column;
+            gap: 4px;
 
-            .row-info {
-                display: flex;
-                flex-direction: column;
-                gap: 4px;
+            .label {
+                font-size: 14px;
+                font-weight: 500;
+                color: #334155;
+            }
 
-                .label {
-                    font-size: 14px;
-                    font-weight: 500;
-                    color: #334155;
-                }
-
-                .description {
-                    font-size: 13px;
-                    color: #64748b;
-                }
+            .description {
+                font-size: 13px;
+                color: #64748b;
             }
         }
     }

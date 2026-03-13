@@ -28,14 +28,16 @@
                 <div class="sections-container">
                     @for (section of sections(); track section.id) {
                     <section [id]="section.id" class="settings-section-item">
+                        <div class="settings-card-container">
                         @if (section.component) {
-                        <ng-container *ngComponentOutlet="section.component"></ng-container>
+                            <ng-container *ngComponentOutlet="section.component"></ng-container>
                         } @else {
-                        <div class="placeholder-card">
-                            <h3>{{ section.label }}</h3>
-                            <p>No component provided for this section.</p>
-                        </div>
+                            <div class="placeholder-card">
+                                <h3>{{ section.label }}</h3>
+                                <p>No component provided for this section.</p>
+                            </div>
                         }
+                        </div>
                     </section>
                     }
                 </div>

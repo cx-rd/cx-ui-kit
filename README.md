@@ -1,8 +1,14 @@
-# @shared/ui-kit
+# @cx-rd/ui-kit
 
 Standardized UI component library for Twilight Kepler projects.
 
 ## Installation
+
+### 載入前預處理
+"到.npmrc加入@cx-rd:registry=https://npm.pkg.github.com//npm.pkg.github.com/:_authToken=你的github token(classic)"後即可下載套件。
+```bash
+npm install @cx-rd/ui-kit
+```
 
 ### 1. Peer Dependencies
 This library requires **Angular CDK**. Ensure it is installed in your project:
@@ -13,7 +19,7 @@ npm install @angular/cdk@19
 ### 2. Style Integration
 Import the library's unified style entry point in your global `styles.scss`:
 ```scss
-@import '@shared/ui-kit/styles/ui-kit';
+@import '@cx-rd/ui-kit/styles/ui-kit';
 ```
 This single import includes:
 - Essential CDK Overlay styles.
@@ -32,7 +38,7 @@ The library provides SCSS variables to maintain consistency. You can override th
 $tp-color-primary: #ea580c; 
 $tp-radius-md: 4px;
 
-@import '@shared/ui-kit/styles/ui-kit';
+@import '@cx-rd/ui-kit/styles/ui-kit';
 ```
 
 ### Available Modules:

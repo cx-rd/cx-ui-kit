@@ -122,13 +122,11 @@
         }
 
         .settings-content {
-            background-color: white;
-            border-radius: $tp-radius-lg;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
-            padding: $tp-spacing-xl;
+            background-color: transparent; // Changed from white as each item will be a card
+            padding: 0; // Padding will be managed by sections
             display: flex;
             flex-direction: column;
-            overflow-y: auto; // Content area must be scrollable
+            overflow-y: auto;
             scroll-behavior: smooth;
 
             .content-body {
@@ -138,12 +136,27 @@
                 .sections-container {
                     display: flex;
                     flex-direction: column;
-                    gap: 40px; // Clear gap between modular sections
-                    padding-bottom: 200px; // Allow last section to scroll up
+                    gap: 32px;
+                    padding: $tp-spacing-md;
+                    padding-bottom: 200px;
                 }
 
                 .settings-section-item {
                     scroll-margin-top: 20px;
+                    
+                    // Unified Card Style
+                    .settings-card-container {
+                        padding: 32px;
+                        background: white;
+                        border-radius: $tp-radius-lg;
+                        border: 1px solid #e2e8f0;
+                        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+                        transition: border-color 0.2s, box-shadow 0.2s;
+
+                        &:hover {
+                            border-color: rgba($tp-color-primary, 0.3);
+                        }
+                    }
                 }
             }
         }
