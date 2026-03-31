@@ -21,7 +21,7 @@ export class MainLayoutComponent {
   isSidebarCollapsed = signal(false);
   isMobileMenuOpen = signal(false);
 
-  @HostListener('window:resize', ['$event'])
+  @HostListener('window:resize')
   onResize() {
     const width = window.innerWidth;
     if (width > 768) {
