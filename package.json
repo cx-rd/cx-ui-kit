@@ -1,6 +1,6 @@
 {
   "name": "@cx-rd/ui-kit",
-  "version": "0.0.4",
+  "version": "0.0.5",
   "peerDependencies": {
     "@angular/cdk": "^19.0.0",
     "@angular/common": "^19.2.0",
