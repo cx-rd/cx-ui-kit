@@ -1,0 +1,202 @@
+:host {
+    display: block;
+    isolation: isolate;
+}
+
+.toast {
+    position: relative;
+    display: grid;
+    grid-template-columns: 42px 1fr 18px;
+    gap: 12px;
+    align-items: start;
+    width: var(--tp-toast-width);
+    max-width: var(--tp-toast-max-width);
+    min-height: var(--tp-toast-min-height);
+    padding: 15px 16px 14px;
+    overflow: hidden;
+    color: var(--tp-toast-text);
+    background-color: color-mix(in srgb, var(--tp-toast-accent) 14%, rgba(244, 248, 252, 0.58));
+    background-image: var(--tp-toast-background);
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: 100% 100%;
+    border: 1px solid var(--tp-toast-border);
+    border-radius: var(--tp-toast-radius);
+    box-shadow: var(--tp-toast-shadow);
+    -webkit-backdrop-filter: var(--tp-toast-backdrop-filter);
+    backdrop-filter: var(--tp-toast-backdrop-filter);
+    contain: paint;
+    isolation: isolate;
+    transform: translateZ(0);
+}
+
+.toast::before {
+    position: absolute;
+    inset: 0;
+    content: '';
+    pointer-events: none;
+    border-radius: inherit;
+    z-index: 0;
+    background:
+        linear-gradient(
+            180deg,
+            rgba(244, 249, 255, 0.5) 0%,
+            rgba(244, 249, 255, 0.38) 42%,
+            rgba(244, 249, 255, 0.24) 100%
+        );
+    opacity: 1;
+}
+
+.toast::after {
+    position: absolute;
+    inset: 0;
+    content: '';
+    pointer-events: none;
+    border-radius: inherit;
+    z-index: 0;
+    background:
+        radial-gradient(circle at 52% 58%, rgba(255, 255, 255, 0.3) 0%, rgba(255, 255, 255, 0.18) 20%, rgba(255, 255, 255, 0) 52%),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.08) 100%);
+    -webkit-backdrop-filter: blur(72px) saturate(182%);
+    backdrop-filter: blur(72px) saturate(182%);
+    opacity: 1;
+}
+
+.toast > * {
+    position: relative;
+    z-index: 1;
+}
+
+.toast__icon {
+    display: grid;
+    place-items: center;
+    width: 36px;
+    height: 36px;
+    margin-top: 0;
+    color: var(--tp-toast-icon);
+    background: rgba(255, 255, 255, 0.701);
+    border: 1px solid color-mix(in srgb, var(--tp-toast-accent) 52%, rgba(255, 255, 255, 0.707));
+    border-radius: 50%;
+    
+}
+
+.toast__icon svg {
+    width: 17px;
+    height: 17px;
+    fill: currentColor;
+    opacity: 0.95;
+}
+
+.toast__body {
+    min-width: 0;
+    padding-right: 4px;
+}
+
+.toast__label {
+    margin: 0 0 4px;
+    font-size: 0.68rem;
+    font-weight: 800;
+    letter-spacing: 0.11em;
+    color: var(--tp-toast-accent);
+    opacity: 0.92;
+    text-transform: uppercase;
+}
+
+.toast__title {
+    margin: 0;
+    font-size: 1.12rem;
+    font-weight: 800;
+    line-height: 1.16;
+    color: var(--tp-toast-title);
+    text-shadow: 0 1px 12px rgba(255, 255, 255, 0.08);
+}
+
+.toast__message {
+    margin: 5px 0 0;
+    font-size: 0.82rem;
+    font-weight: 500;
+    line-height: 1.42;
+    color: var(--tp-toast-message);
+    max-width: 31ch;
+}
+
+.toast__action {
+    margin-top: 12px;
+    padding: 7px 12px;
+    font: inherit;
+    font-size: 0.76rem;
+    font-weight: 700;
+    color: #0f172a;
+    background: rgba(255, 255, 255, 0.78);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 999px;
+    cursor: pointer;
+    backdrop-filter: blur(12px);
+}
+
+.toast__action--ghost {
+    color: var(--tp-toast-text);
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.toast__close {
+    position: relative;
+    display: grid;
+    place-items: center;
+    width: 16px;
+    height: 16px;
+    margin-top: 2px;
+    padding: 0;
+    justify-self: end;
+    background: transparent;
+    border: 0;
+    cursor: pointer;
+    opacity: 0.58;
+}
+
+.toast__close span {
+    position: absolute;
+    width: 9px;
+    height: 1px;
+    background: rgba(255, 255, 255, 0.82);
+    border-radius: 999px;
+}
+
+.toast__close span:first-child {
+    transform: rotate(45deg);
+}
+
+.toast__close span:last-child {
+    transform: rotate(-45deg);
+}
+
+.toast--loading .toast__icon svg {
+    animation: toast-spin 1s linear infinite;
+}
+
+@keyframes toast-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-width: 640px) {
+    .toast {
+        grid-template-columns: 36px 1fr 16px;
+        gap: 10px;
+        padding: 14px;
+    }
+
+    .toast__close {
+        margin-top: 2px;
+    }
+
+    .toast__title {
+        font-size: 0.98rem;
+    }
+
+    .toast__message {
+        max-width: none;
+    }
+}
