@@ -121,5 +121,84 @@ Customizable fields:
 - `className`
 - `styles`: override accent, border, background, text, width, radius, shadow, and more
 
+## SelectList
+`SelectListComponent` is designed around two orthogonal concerns so new select patterns can be added without breaking old consumers:
+- `selectionMode`: `single | multi`
+- `dataSource`: static options, async search, or async paging
+
+```ts
+import { Component } from '@angular/core';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
+import {
+  SelectListComponent,
+  SelectListDataSource,
+  SelectListOption
+} from '@cx-rd/ui-kit';
+
+const projectOptions: SelectListOption<string>[] = [
+  { value: 'core', label: 'Core Platform', caption: 'Shared backend services' },
+  { value: 'portal', label: 'Portal UI', caption: 'Angular workspace and design system' }
+];
+
+@Component({
+  standalone: true,
+  imports: [ReactiveFormsModule, SelectListComponent],
+  template: `
+    <lib-select-list
+      label="Project"
+      placeholder="Choose a project"
+      [options]="projectOptions"
+      [formControl]="projectControl">
+    </lib-select-list>
+
+    <lib-select-list
+      label="Capabilities"
+      placeholder="Choose capabilities"
+      selectionMode="multi"
+      [options]="capabilityOptions"
+      [showSelectAll]="true"
+      [formControl]="capabilityControl">
+    </lib-select-list>
+
+    <lib-select-list
+      label="Reviewers"
+      placeholder="Search teammates"
+      selectionMode="multi"
+      [dataSource]="reviewerSource"
+      [formControl]="reviewerControl">
+    </lib-select-list>
+  `
+})
+export class ExampleComponent {
+  readonly projectOptions = projectOptions;
+  readonly capabilityOptions: SelectListOption<string>[] = [
+    { value: 'design-system', label: 'Design System' },
+    { value: 'audit-trail', label: 'Audit Trail' }
+  ];
+
+  readonly projectControl = new FormControl<string | null>('portal');
+  readonly capabilityControl = new FormControl<string[]>(['design-system'], { nonNullable: true });
+  readonly reviewerControl = new FormControl<string[]>([], { nonNullable: true });
+
+  readonly reviewerSource: SelectListDataSource<string> = {
+    debounceMs: 250,
+    minQueryLength: 1,
+    asyncLoader: async ({ query, page }) => fetchRemoteReviewers(query, page)
+  };
+}
+```
+
+Useful inputs:
+- `label`, `hint`, `placeholder`, `searchPlaceholder`
+- `selectionMode`, `showSelectAll`, `visibleSelectionLimit`, `maxSelections`
+- `options` for local data
+- `dataSource` for seeded async options, debounced remote search, and paging
+- `compareWith` when values are objects instead of primitives
+
+Useful outputs:
+- `selectionChange`
+- `searchChange`
+- `openedChange`
+
 ## Known Limitations
 - Overlays such as flyouts and modals are appended to the `body` level to escape local stacking contexts.
