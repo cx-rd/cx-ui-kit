@@ -1,4 +1,4 @@
-@import '../../core/styles/tokens/index';
+@use '../../core/styles/tokens' as *;
 
 .modal-backdrop {
     position: fixed;

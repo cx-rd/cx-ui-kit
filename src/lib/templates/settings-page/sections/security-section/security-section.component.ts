@@ -1,10 +1,9 @@
 import { Component } from '@angular/core';
-import { CommonModule } from '@angular/common';
 
 @Component({
     selector: 'lib-security-settings-section',
     standalone: true,
-    imports: [CommonModule],
+    imports: [],
     templateUrl: './security-section.component.html',
     styleUrl: './security-section.component.scss'
 })

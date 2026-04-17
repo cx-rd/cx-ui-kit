@@ -1,5 +1,5 @@
-import { CommonModule } from '@angular/common';
-import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { NgStyle } from '@angular/common';
+import { Component, computed, input, output } from '@angular/core';
 import { ToastAction, ToastInstance, ToastStyleOverrides, ToastVariant } from '../../core/models';
 
 interface ToastTheme {
@@ -22,20 +22,20 @@ interface ToastTheme {
 @Component({
     selector: 'lib-toast',
     standalone: true,
-    imports: [CommonModule],
+    imports: [NgStyle],
     templateUrl: './toast.component.html',
     styleUrl: './toast.component.scss'
 })
 export class ToastComponent {
-    @Input({ required: true }) toast!: ToastInstance;
+    readonly toast = input.required<ToastInstance>();
 
-    @Output() dismiss = new EventEmitter<string>();
-    @Output() actionClick = new EventEmitter<{ id: string; action: ToastAction }>();
-    @Output() hoverChange = new EventEmitter<{ id: string; hovering: boolean }>();
+    readonly dismiss = output<string>();
+    readonly actionClick = output<{ id: string; action: ToastAction }>();
+    readonly hoverChange = output<{ id: string; hovering: boolean }>();
 
-    /** Maps the resolved toast theme into CSS custom properties for the template. */
-    get hostStyles(): Record<string, string> {
-        const theme = this.resolveTheme(this.toast?.variant ?? 'info', this.toast?.styles);
+    readonly hostStyles = computed<Record<string, string>>(() => {
+        const toast = this.toast();
+        const theme = this.resolveTheme(toast.variant ?? 'info', toast.styles);
 
         return {
             '--tp-toast-accent': theme.accentColor,
@@ -53,33 +53,27 @@ export class ToastComponent {
             '--tp-toast-radius': theme.borderRadius,
             '--tp-toast-shadow': theme.boxShadow
         };
-    }
+    });
 
-    /** Returns the explicit icon override or the default icon for the current variant. */
-    get iconSvg(): string {
-        if (this.toast?.icon) {
-            return this.toast.icon;
-        }
+    readonly iconSvg = computed(() => {
+        const toast = this.toast();
+        return toast.icon ?? DEFAULT_ICON_MAP[toast.variant ?? 'info'];
+    });
 
-        return DEFAULT_ICON_MAP[this.toast?.variant ?? 'info'];
-    }
+    readonly toastClassName = computed(() => this.toast().className ?? '');
 
-    /** Emits the current toast id so the viewport can dismiss it. */
     onDismiss(): void {
-        this.dismiss.emit(this.toast.id);
+        this.dismiss.emit(this.toast().id);
     }
 
-    /** Emits the clicked toast action for the consumer to handle. */
     onAction(action: ToastAction): void {
-        this.actionClick.emit({ id: this.toast.id, action });
+        this.actionClick.emit({ id: this.toast().id, action });
     }
 
-    /** Reports hover state changes so auto-close timers can pause and resume. */
     onHover(hovering: boolean): void {
-        this.hoverChange.emit({ id: this.toast.id, hovering });
+        this.hoverChange.emit({ id: this.toast().id, hovering });
     }
 
-    /** Merges the variant defaults with any consumer-provided style overrides. */
     private resolveTheme(variant: ToastVariant, overrides?: ToastStyleOverrides): ToastTheme {
         return { ...DEFAULT_THEME_MAP[variant], ...overrides };
     }

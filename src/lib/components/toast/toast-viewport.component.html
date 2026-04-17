@@ -1,22 +1,23 @@
-<ng-container *ngFor="let group of groups; trackBy: trackGroupPosition">
+@for (group of groups(); track group[0]) {
     <section
         class="toast-stack"
+        [class]="positionClasses[group[0]]"
         [attr.data-position]="group[0]"
         [class.toast-stack--expanded]="isExpanded(group[0])"
         (focusin)="setExpanded(group[0], true)"
-        (focusout)="onStackFocusOut(group[0], $event)"
-        [ngClass]="positionClasses[group[0]]">
-        <div
-            class="toast-stack__item"
-            *ngFor="let toast of getStackedToasts(group[1]); trackBy: trackToastId; let index = index"
-            [style.--stack-index]="index"
-            [style.--stack-z]="20 - index">
-            <lib-toast
-                [toast]="toast"
-                (dismiss)="dismiss($event)"
-                (hoverChange)="onToastHover(group[0], $event)"
-                (actionClick)="onAction($event)">
-            </lib-toast>
-        </div>
+        (focusout)="onStackFocusOut(group[0], $event)">
+        @for (toast of getStackedToasts(group[1]); track toast.id; let index = $index) {
+            <div
+                class="toast-stack__item"
+                [style.--stack-index]="index"
+                [style.--stack-z]="20 - index">
+                <lib-toast
+                    [toast]="toast"
+                    (dismiss)="dismiss($event)"
+                    (hoverChange)="onToastHover(group[0], $event)"
+                    (actionClick)="onAction($event)">
+                </lib-toast>
+            </div>
+        }
     </section>
-</ng-container>
+}

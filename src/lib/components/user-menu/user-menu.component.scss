@@ -1,4 +1,4 @@
-@import '../../core/styles/tokens/index';
+@use '../../core/styles/tokens' as *;
 
 .user-menu-container {
     width: 240px;

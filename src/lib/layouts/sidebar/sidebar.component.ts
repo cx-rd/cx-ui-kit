@@ -1,7 +1,8 @@
-import { Component, input, signal, Output, EventEmitter, effect, inject } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, effect, inject, input, output, signal, booleanAttribute, DestroyRef } from '@angular/core';
 import { OverlayModule, ConnectedPosition } from '@angular/cdk/overlay';
-import { RouterModule, Router } from '@angular/router';
+import { NavigationEnd, Router, RouterModule } from '@angular/router';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { filter } from 'rxjs';
 
 export interface NavItem {
   icon: string;
@@ -14,149 +15,98 @@ export interface NavItem {
 @Component({
   selector: 'lib-sidebar',
   standalone: true,
-  imports: [CommonModule, OverlayModule, RouterModule],
+  imports: [OverlayModule, RouterModule],
   templateUrl: './sidebar.component.html',
   styleUrl: './sidebar.component.scss'
 })
 export class SidebarComponent {
-  productName = input<string>('Product Name');
-  navItems = input<NavItem[]>([]);
-  isCollapsed = input<boolean>(false);
+  readonly productName = input('Product Name');
+  readonly navItems = input<NavItem[]>([]);
+  readonly isCollapsed = input(false, { transform: booleanAttribute });
 
-  @Output() toggle = new EventEmitter<void>();
-  @Output() closeMenu = new EventEmitter<void>();
+  readonly toggle = output<void>();
+  readonly closeMenu = output<void>();
 
-    private router = inject(Router);
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
 
-    activeItem = signal<NavItem | null>(null);
-    flyoutItem = signal<NavItem | null>(null);
+  readonly activeItem = signal<NavItem | null>(null);
+  readonly flyoutItem = signal<NavItem | null>(null);
 
-    // CDK Overlay Positions
-    flyoutPositions: ConnectedPosition[] = [
-        {
-            originX: 'end',
-            originY: 'top',
-            overlayX: 'start',
-            overlayY: 'top',
-            offsetX: 8
-        }
-    ];
+  readonly flyoutPositions: ConnectedPosition[] = [
+    {
+      originX: 'end',
+      originY: 'top',
+      overlayX: 'start',
+      overlayY: 'top',
+      offsetX: 8
+    }
+  ];
 
-    constructor() {
-        effect(() => {
-            const collapsed = this.isCollapsed();
-            // 當收起狀態改變時，關閉所有的 Flyout
-            this.flyoutItem.set(null);
+  constructor() {
+    effect(() => {
+      const collapsed = this.isCollapsed();
+      const items = this.navItems();
+      const active = this.activeItem();
 
-            // 當從收起變回展開時，自動展開目前選中項目的父層
-            if (!collapsed) {
-                const active = this.activeItem();
-                if (active) {
-                    this.navItems().forEach(navItem => {
-                        if (navItem.children?.some(child => child === active)) {
-                            navItem.expanded = true;
-                        }
-                    });
-                }
-            }
-        });
+      this.flyoutItem.set(null);
 
-        // Initialize and listen to router changes
-        this.router.events.subscribe(event => {
-            if (event.constructor.name === 'NavigationEnd') {
-                this.syncActiveItemWithRoute();
-            }
-        });
+      if (!collapsed && active) {
+        this.expandParentGroup(items, active);
+      }
+    });
+
+    effect(() => {
+      this.navItems();
+      this.syncActiveItemWithRoute();
+    });
+
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        takeUntilDestroyed(this.destroyRef)
+      )
+      .subscribe(() => this.syncActiveItemWithRoute());
+  }
+
+  toggleSidebar(): void {
+    this.toggle.emit();
+    this.flyoutItem.set(null);
+  }
+
+  onClose(): void {
+    this.closeMenu.emit();
+  }
+
+  showFlyout(item: NavItem): void {
+    if (this.isCollapsed() && item.children?.length) {
+      this.flyoutItem.set(item);
+    }
+  }
+
+  hideFlyout(): void {
+    this.flyoutItem.set(null);
+  }
+
+  selectItem(item: NavItem): void {
+    if (this.isCollapsed() && item.children?.length) {
+      this.showFlyout(item);
+      return;
     }
 
-    ngOnInit() {
-        this.syncActiveItemWithRoute();
-    }
-
-    private syncActiveItemWithRoute() {
-        const currentUrl = this.router.url;
-        const items = this.navItems();
-        let foundMatch = false;
-
-        for (const navItem of items) {
-            // Check direct route match
-            if (navItem.route && currentUrl.startsWith(navItem.route)) {
-                this.activeItem.set(navItem);
-                foundMatch = true;
-                break;
-            }
-
-            // Check children
-            if (navItem.children) {
-                const activeChild = navItem.children.find(child => 
-                    child.route && currentUrl.startsWith(child.route)
-                );
-                if (activeChild) {
-                    this.activeItem.set(activeChild);
-                    navItem.expanded = true; // Auto-expand current group
-                    foundMatch = true;
-                    break;
-                }
-            }
-        }
-
-        if (!foundMatch) {
-            this.activeItem.set(null);
-        }
-    }
-
-    toggleSidebar() {
-        this.toggle.emit();
-        this.flyoutItem.set(null);
-    }
-
-    onClose() {
-        this.closeMenu.emit();
-    }
-
-    showFlyout(item: NavItem) {
-        if (this.isCollapsed() && item.children) {
-            this.flyoutItem.set(item);
-        }
-    }
-
-    hideFlyout() {
-        this.flyoutItem.set(null);
-    }
-
-    selectItem(item: NavItem) {
-        // 如果在收起狀態點擊有子項目的項目，僅顯示 Flyout 而不切換內部的 expanded 狀態
-        if (this.isCollapsed() && item.children) {
-            this.showFlyout(item);
-            return;
-        }
-
-        if (item.children) {
-            item.expanded = !item.expanded;
-        } else {
-            this.activeItem.set(item);
-
-            if (item.route) {
-                this.router.navigateByUrl(item.route);
-                this.closeMenu.emit(); // Close mobile menu on navigation
-            }
-
-            // 當點擊子項目或無子項目的主項目時，處理收起邏輯（自動收起非當前路徑的組）
-            this.navItems().forEach(navItem => {
-                if (navItem.children) {
-                    const isChildOfThisPattern = navItem.children.some(child => child === item);
-                    if (!isChildOfThisPattern) {
-                        navItem.expanded = false;
-                    }
-                }
-            });
-        }
-    }
-
-  toggleGroup(item: NavItem) {
-    if (item.children) {
+    if (item.children?.length) {
       item.expanded = !item.expanded;
+      return;
     }
+
+    this.activeItem.set(item);
+
+    if (item.route) {
+      void this.router.navigateByUrl(item.route);
+      this.closeMenu.emit();
+    }
+
+    this.collapseOtherGroups(item);
   }
 
   isActive(item: NavItem): boolean {
@@ -164,7 +114,54 @@ export class SidebarComponent {
   }
 
   isChildActive(item: NavItem): boolean {
-    if (!item.children || !this.activeItem()) return false;
-    return item.children.some(child => child === this.activeItem());
+    const active = this.activeItem();
+
+    if (!item.children?.length || !active) {
+      return false;
+    }
+
+    return item.children.some((child) => child === active);
+  }
+
+  private syncActiveItemWithRoute(): void {
+    const currentUrl = this.router.url;
+    const items = this.navItems();
+
+    for (const navItem of items) {
+      if (navItem.route && currentUrl.startsWith(navItem.route)) {
+        this.activeItem.set(navItem);
+        return;
+      }
+
+      const activeChild = navItem.children?.find((child) => child.route && currentUrl.startsWith(child.route));
+      if (activeChild) {
+        this.activeItem.set(activeChild);
+        navItem.expanded = true;
+        return;
+      }
+    }
+
+    this.activeItem.set(null);
+  }
+
+  private expandParentGroup(items: NavItem[], active: NavItem): void {
+    for (const navItem of items) {
+      if (navItem.children?.some((child) => child === active)) {
+        navItem.expanded = true;
+      }
+    }
+  }
+
+  private collapseOtherGroups(activeLeaf: NavItem): void {
+    for (const navItem of this.navItems()) {
+      if (!navItem.children?.length) {
+        continue;
+      }
+
+      const isParentOfActiveLeaf = navItem.children.some((child) => child === activeLeaf);
+      if (!isParentOfActiveLeaf) {
+        navItem.expanded = false;
+      }
+    }
   }
 }

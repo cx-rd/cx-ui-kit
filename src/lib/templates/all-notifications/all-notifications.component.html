@@ -14,52 +14,56 @@
     <nav class="filter-tabs">
         <button class="tab-btn" [class.active]="activeTab() === 'All'" (click)="setTab('All')">All</button>
         <button class="tab-btn" [class.active]="activeTab() === 'Alerts'" (click)="setTab('Alerts')">Alerts</button>
-        <button class="tab-btn" [class.active]="activeTab() === 'Messages'"
-            (click)="setTab('Messages')">Messages</button>
+        <button class="tab-btn" [class.active]="activeTab() === 'Messages'" (click)="setTab('Messages')">Messages</button>
     </nav>
 
     <div class="notifications-list">
-        <div *ngFor="let item of filteredNotifications()" class="notification-card" [class.unread]="!item.isRead"
-            (click)="viewDetail(item)">
-            <div class="card-header">
-                <div class="header-left">
-                    <span class="material-icons icon-type" [class.alert]="item.type === 'alert'"
-                        [class.update]="item.type === 'update'">
-                        {{ item.type === 'alert' ? 'report' : 'info' }}
-                    </span>
-                    <span class="type-label">{{ item.type === 'alert' ? 'System Alert' : 'Project Update' }}</span>
-                </div>
-                <div class="header-right">
-                    <span class="time">{{ item.time | relativeTime }}</span>
-                    <button class="icon-btn small">
-                        <span class="material-icons">more_horiz</span>
-                    </button>
-                </div>
-            </div>
-
-            <div class="card-body">
-                <h2 class="card-title">{{ item.title }}</h2>
-                <div class="sender-info" *ngIf="item.sender">
-                    <span class="sender-label">From: </span>
-                    <span class="sender-name">{{ item.sender }}</span>
-                </div>
-
-                <hr class="card-divider">
-
-                <div class="card-content-wrapper" [class.has-image]="item.imageUrl">
-                    <div *ngIf="item.imageUrl" class="content-image">
-                        <img [src]="item.imageUrl" alt="Notification image">
+        @for (item of filteredNotifications(); track item.id) {
+            <div class="notification-card" [class.unread]="!item.isRead" (click)="viewDetail(item)">
+                <div class="card-header">
+                    <div class="header-left">
+                        <span class="material-icons icon-type" [class.alert]="item.type === 'alert'"
+                            [class.update]="item.type === 'update'">
+                            {{ item.type === 'alert' ? 'report' : 'info' }}
+                        </span>
+                        <span class="type-label">{{ item.type === 'alert' ? 'System Alert' : 'Project Update' }}</span>
                     </div>
-                    <div class="content-text">
-                        <p>{{ item.fullContent || item.summary }}</p>
+                    <div class="header-right">
+                        <span class="time">{{ item.time | relativeTime }}</span>
+                        <button class="icon-btn small">
+                            <span class="material-icons">more_horiz</span>
+                        </button>
                     </div>
                 </div>
+
+                <div class="card-body">
+                    <h2 class="card-title">{{ item.title }}</h2>
+                    @if (item.sender) {
+                        <div class="sender-info">
+                            <span class="sender-label">From: </span>
+                            <span class="sender-name">{{ item.sender }}</span>
+                        </div>
+                    }
+
+                    <hr class="card-divider">
+
+                    <div class="card-content-wrapper" [class.has-image]="!!item.imageUrl">
+                        @if (item.imageUrl) {
+                            <div class="content-image">
+                                <img [src]="item.imageUrl" alt="Notification image">
+                            </div>
+                        }
+                        <div class="content-text">
+                            <p>{{ item.fullContent || item.summary }}</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
+        }
     </div>
 
-    <!-- Detail Modal -->
-    <lib-notification-detail-modal *ngIf="selectedNotification()" [notification]="selectedNotification()"
-        (close)="closeModal()">
-    </lib-notification-detail-modal>
+    @if (selectedNotification()) {
+        <lib-notification-detail-modal [notification]="selectedNotification()" (close)="closeModal()">
+        </lib-notification-detail-modal>
+    }
 </div>

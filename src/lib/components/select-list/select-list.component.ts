@@ -1,21 +1,20 @@
 import { CdkOverlayOrigin, ConnectedPosition, OverlayModule } from '@angular/cdk/overlay';
-import { CommonModule } from '@angular/common';
 import {
     ChangeDetectionStrategy,
     ChangeDetectorRef,
     Component,
     DestroyRef,
     ElementRef,
-    EventEmitter,
     HostListener,
-    Input,
-    OnChanges,
     OnDestroy,
-    Output,
-    SimpleChanges,
-    ViewChild,
+    booleanAttribute,
+    effect,
     forwardRef,
-    inject
+    inject,
+    input,
+    numberAttribute,
+    output,
+    viewChild
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ControlValueAccessor, FormControl, NG_VALUE_ACCESSOR, ReactiveFormsModule } from '@angular/forms';
@@ -36,10 +35,18 @@ interface SelectListOptionGroup {
     options: SelectListOption[];
 }
 
+function optionalBooleanAttribute(value: boolean | string | null | undefined): boolean | undefined {
+    return value == null ? undefined : booleanAttribute(value);
+}
+
+function optionalNumberAttribute(value: number | string | null | undefined): number | null {
+    return value == null ? null : numberAttribute(value);
+}
+
 @Component({
     selector: 'lib-select-list',
     standalone: true,
-    imports: [CommonModule, OverlayModule, ReactiveFormsModule],
+    imports: [OverlayModule, ReactiveFormsModule],
     templateUrl: './select-list.component.html',
     styleUrl: './select-list.component.scss',
     changeDetection: ChangeDetectionStrategy.OnPush,
@@ -51,40 +58,46 @@ interface SelectListOptionGroup {
         }
     ]
 })
-export class SelectListComponent implements ControlValueAccessor, OnChanges, OnDestroy {
+export class SelectListComponent implements ControlValueAccessor, OnDestroy {
     private readonly cdr = inject(ChangeDetectorRef);
     private readonly destroyRef = inject(DestroyRef);
 
     private static nextId = 0;
 
-    @ViewChild(CdkOverlayOrigin) private overlayOrigin?: CdkOverlayOrigin;
-    @ViewChild('triggerButton', { read: ElementRef }) private triggerButton?: ElementRef<HTMLButtonElement>;
-    @ViewChild('searchInput', { read: ElementRef }) private searchInput?: ElementRef<HTMLInputElement>;
+    private readonly overlayOrigin = viewChild(CdkOverlayOrigin);
+    private readonly triggerButton = viewChild<unknown, ElementRef<HTMLButtonElement>>('triggerButton', { read: ElementRef });
+    private readonly searchInput = viewChild<unknown, ElementRef<HTMLInputElement>>('searchInput', { read: ElementRef });
 
-    @Input() label?: string;
-    @Input() hint?: string;
-    @Input() placeholder = 'Select options';
-    @Input() searchPlaceholder = 'Search options';
-    @Input() emptyLabel = 'No options available';
-    @Input() loadingLabel = 'Loading options...';
-    @Input() minSearchLabel?: string;
-    @Input() selectionMode: SelectListSelectionMode = 'single';
-    @Input() options: SelectListOption<any>[] = [];
-    @Input() dataSource?: SelectListDataSource<any>;
-    @Input() searchable?: boolean;
-    @Input() clearable = true;
-    @Input() closeOnSelect?: boolean;
-    @Input() showSelectAll = false;
-    @Input() visibleSelectionLimit = 2;
-    @Input() maxSelections?: number | null;
-    @Input() required = false;
-    @Input() invalid = false;
-    @Input() disabled = false;
-    @Input() compareWith: SelectListCompareWith<any> = (left, right) => left === right;
+    readonly label = input<string>();
+    readonly hint = input<string>();
+    readonly placeholder = input('Select options');
+    readonly searchPlaceholder = input('Search options');
+    readonly emptyLabel = input('No options available');
+    readonly loadingLabel = input('Loading options...');
+    readonly minSearchLabel = input<string>();
+    readonly selectionMode = input<SelectListSelectionMode>('single');
+    readonly options = input<SelectListOption[]>([]);
+    readonly dataSource = input<SelectListDataSource | undefined>();
+    readonly searchable = input<boolean | undefined, boolean | string | null | undefined>(undefined, {
+        transform: optionalBooleanAttribute
+    });
+    readonly clearable = input(true, { transform: booleanAttribute });
+    readonly closeOnSelect = input<boolean | undefined, boolean | string | null | undefined>(undefined, {
+        transform: optionalBooleanAttribute
+    });
+    readonly showSelectAll = input(false, { transform: booleanAttribute });
+    readonly visibleSelectionLimit = input(2, { transform: numberAttribute });
+    readonly maxSelections = input<number | null, number | string | null | undefined>(null, {
+        transform: optionalNumberAttribute
+    });
+    readonly required = input(false, { transform: booleanAttribute });
+    readonly invalid = input(false, { transform: booleanAttribute });
+    readonly disabled = input(false, { transform: booleanAttribute });
+    readonly compareWith = input<SelectListCompareWith>((left, right) => left === right);
 
-    @Output() readonly selectionChange = new EventEmitter<SelectListSelectionChange>();
-    @Output() readonly searchChange = new EventEmitter<SelectListSearchChange>();
-    @Output() readonly openedChange = new EventEmitter<boolean>();
+    readonly selectionChange = output<SelectListSelectionChange>();
+    readonly searchChange = output<SelectListSearchChange>();
+    readonly openedChange = output<boolean>();
 
     readonly triggerId = `tp-select-list-trigger-${SelectListComponent.nextId}`;
     readonly panelId = `tp-select-list-panel-${SelectListComponent.nextId++}`;
@@ -123,10 +136,50 @@ export class SelectListComponent implements ControlValueAccessor, OnChanges, OnD
                 }
                 this.cdr.markForCheck();
             });
+
+        effect(() => {
+            const selectionMode = this.selectionMode();
+            this.selectedValues = this.normalizeSelection(this.lastWrittenValue, selectionMode);
+            this.cdr.markForCheck();
+        });
+
+        effect(() => {
+            this.options();
+            this.dataSource();
+
+            this.syncKnownOptions(this.staticOptionPool);
+
+            if (!this.isAsyncMode) {
+                this.resetAsyncState();
+            } else if (this.isPanelOpen) {
+                this.scheduleAsyncLoad(true, true);
+            }
+
+            this.cdr.markForCheck();
+        });
+
+        effect(() => {
+            if (this.disabled() && this.isPanelOpen) {
+                this.closePanel();
+                return;
+            }
+
+            this.cdr.markForCheck();
+        });
+
+        effect(() => {
+            this.searchable();
+
+            if (!this.canShowSearch) {
+                this.resetSearch();
+            }
+
+            this.cdr.markForCheck();
+        });
     }
 
     get dataMode(): SelectListDataMode {
-        return this.dataSource?.asyncLoader ? 'async' : 'static';
+        return this.dataSource()?.asyncLoader ? 'async' : 'static';
     }
 
     get isAsyncMode(): boolean {
@@ -134,31 +187,35 @@ export class SelectListComponent implements ControlValueAccessor, OnChanges, OnD
     }
 
     get isMulti(): boolean {
-        return this.selectionMode === 'multi';
+        return this.selectionMode() === 'multi';
     }
 
     get isDisabled(): boolean {
-        return this.disabled || this.controlDisabled;
+        return this.disabled() || this.controlDisabled;
     }
 
     get canShowSearch(): boolean {
-        if (typeof this.searchable === 'boolean') {
-            return this.searchable;
+        const searchable = this.searchable();
+
+        if (typeof searchable === 'boolean') {
+            return searchable;
         }
 
         return this.isAsyncMode || this.staticOptionPool.length > 7;
     }
 
     get resolvedCloseOnSelect(): boolean {
-        if (typeof this.closeOnSelect === 'boolean') {
-            return this.closeOnSelect;
+        const closeOnSelect = this.closeOnSelect();
+
+        if (typeof closeOnSelect === 'boolean') {
+            return closeOnSelect;
         }
 
         return !this.isMulti;
     }
 
     get minQueryLength(): number {
-        return Math.max(0, this.dataSource?.minQueryLength ?? 0);
+        return Math.max(0, this.dataSource()?.minQueryLength ?? 0);
     }
 
     get visibleOptions(): SelectListOption[] {
@@ -178,7 +235,7 @@ export class SelectListComponent implements ControlValueAccessor, OnChanges, OnD
     }
 
     get visibleSelectedOptions(): SelectListOption[] {
-        return this.selectedOptions.slice(0, Math.max(1, this.visibleSelectionLimit));
+        return this.selectedOptions.slice(0, Math.max(1, this.visibleSelectionLimit()));
     }
 
     get hiddenSelectionCount(): number {
@@ -199,7 +256,7 @@ export class SelectListComponent implements ControlValueAccessor, OnChanges, OnD
     }
 
     get resolvedMinQueryLabel(): string {
-        return this.minSearchLabel ?? `Type at least ${this.minQueryLength} characters to search`;
+        return this.minSearchLabel() ?? `Type at least ${this.minQueryLength} characters to search`;
     }
 
     get selectableVisibleOptions(): SelectListOption[] {
@@ -207,7 +264,7 @@ export class SelectListComponent implements ControlValueAccessor, OnChanges, OnD
     }
 
     get showClearButton(): boolean {
-        return this.clearable && this.hasSelection && !this.isDisabled;
+        return this.clearable() && this.hasSelection && !this.isDisabled;
     }
 
     get allVisibleOptionsSelected(): boolean {
@@ -224,45 +281,19 @@ export class SelectListComponent implements ControlValueAccessor, OnChanges, OnD
 
     get trackSelectedSummary(): string {
         if (!this.hasSelection) {
-            return this.placeholder;
+            return this.placeholder();
         }
 
         if (!this.isMulti) {
-            return this.selectedOption?.label ?? this.placeholder;
+            return this.selectedOption?.label ?? this.placeholder();
         }
 
         return `${this.selectedOptions.length} selected`;
     }
 
-    ngOnChanges(changes: SimpleChanges): void {
-        if (changes['selectionMode']) {
-            this.selectedValues = this.normalizeSelection(this.lastWrittenValue, this.selectionMode);
-        }
-
-        if (changes['options'] || changes['dataSource']) {
-            this.syncKnownOptions(this.staticOptionPool);
-
-            if (!this.isAsyncMode) {
-                this.resetAsyncState();
-            } else if (this.isPanelOpen) {
-                this.scheduleAsyncLoad(true, true);
-            }
-        }
-
-        if (changes['disabled'] && this.isDisabled && this.isPanelOpen) {
-            this.closePanel();
-        }
-
-        if (changes['searchable'] && !this.canShowSearch) {
-            this.resetSearch();
-        }
-
-        this.cdr.markForCheck();
-    }
-
     writeValue(value: unknown): void {
         this.lastWrittenValue = value;
-        this.selectedValues = this.normalizeSelection(value, this.selectionMode);
+        this.selectedValues = this.normalizeSelection(value, this.selectionMode());
         this.syncKnownOptions(this.selectedValues.map((item) => this.buildFallbackOption(item)));
         this.cdr.markForCheck();
     }
@@ -319,7 +350,7 @@ export class SelectListComponent implements ControlValueAccessor, OnChanges, OnD
         this.openedChange.emit(true);
 
         if (this.canShowSearch) {
-            setTimeout(() => this.searchInput?.nativeElement.focus(), 0);
+            setTimeout(() => this.searchInput()?.nativeElement.focus(), 0);
         }
 
         if (this.isAsyncMode) {
@@ -352,6 +383,7 @@ export class SelectListComponent implements ControlValueAccessor, OnChanges, OnD
 
     toggleSelectAll(): void {
         const visibleOptions = this.selectableVisibleOptions;
+        const maxSelections = this.maxSelections();
 
         if (!visibleOptions.length) {
             return;
@@ -373,7 +405,7 @@ export class SelectListComponent implements ControlValueAccessor, OnChanges, OnD
                 continue;
             }
 
-            if (this.maxSelections && nextValues.length >= this.maxSelections) {
+            if (maxSelections && nextValues.length >= maxSelections) {
                 break;
             }
 
@@ -426,23 +458,19 @@ export class SelectListComponent implements ControlValueAccessor, OnChanges, OnD
     }
 
     isOptionLocked(option: SelectListOption): boolean {
-        return !!this.maxSelections
+        const maxSelections = this.maxSelections();
+
+        return !!maxSelections
             && !this.isSelected(option)
-            && this.selectedValues.length >= this.maxSelections;
+            && this.selectedValues.length >= maxSelections;
     }
-
-    trackByOption = (_: number, option: SelectListOption): string | number | unknown =>
-        option.id ?? option.value ?? option.label;
-
-    trackByGroup = (index: number, group: SelectListOptionGroup): string =>
-        `${group.label ?? 'group'}-${index}`;
 
     private get normalizedQuery(): string {
         return this.searchControl.value.trim();
     }
 
     private get staticOptionPool(): SelectListOption[] {
-        return this.mergeOptionCollections(this.options, this.dataSource?.options ?? []);
+        return this.mergeOptionCollections(this.options(), this.dataSource()?.options ?? []);
     }
 
     private get optionPool(): SelectListOption[] {
@@ -452,7 +480,8 @@ export class SelectListComponent implements ControlValueAccessor, OnChanges, OnD
     }
 
     private updateSelection(nextValues: unknown[], option?: SelectListOption): void {
-        const normalizedValues = this.normalizeSelection(nextValues, this.selectionMode);
+        const selectionMode = this.selectionMode();
+        const normalizedValues = this.normalizeSelection(nextValues, selectionMode);
         const resolvedOptions = normalizedValues.map((value) => this.resolveOption(value));
         const selectedOption = option ?? resolvedOptions[0] ?? null;
         const emittedValue = this.isMulti
@@ -464,7 +493,7 @@ export class SelectListComponent implements ControlValueAccessor, OnChanges, OnD
         this.syncKnownOptions(resolvedOptions);
         this.onChange(emittedValue);
         this.selectionChange.emit({
-            mode: this.selectionMode,
+            mode: selectionMode,
             value: emittedValue,
             values: [...normalizedValues],
             option: this.isMulti ? selectedOption : (resolvedOptions[0] ?? null),
@@ -576,14 +605,14 @@ export class SelectListComponent implements ControlValueAccessor, OnChanges, OnD
             this.currentPage = 1;
         }
 
-        const delay = immediate ? 0 : (this.dataSource?.debounceMs ?? 250);
+        const delay = immediate ? 0 : (this.dataSource()?.debounceMs ?? 250);
         this.loadTimer = setTimeout(() => {
             void this.fetchAsyncOptions(resetPage);
         }, delay);
     }
 
     private async fetchAsyncOptions(resetPage: boolean): Promise<void> {
-        const loader = this.dataSource?.asyncLoader;
+        const loader = this.dataSource()?.asyncLoader;
 
         if (!loader) {
             return;
@@ -700,7 +729,7 @@ export class SelectListComponent implements ControlValueAccessor, OnChanges, OnD
     }
 
     private areValuesEqual(left: unknown, right: unknown): boolean {
-        return this.compareWith(left, right);
+        return this.compareWith()(left, right);
     }
 
     private isSelectedValue(source: unknown[], value: unknown): boolean {
@@ -708,8 +737,8 @@ export class SelectListComponent implements ControlValueAccessor, OnChanges, OnD
     }
 
     private updateOverlayWidth(): void {
-        const width = this.triggerButton?.nativeElement.getBoundingClientRect().width
-            ?? this.overlayOrigin?.elementRef.nativeElement.getBoundingClientRect().width;
+        const width = this.triggerButton()?.nativeElement.getBoundingClientRect().width
+            ?? this.overlayOrigin()?.elementRef.nativeElement.getBoundingClientRect().width;
 
         this.overlayWidth = width ? Math.round(width) : 0;
     }

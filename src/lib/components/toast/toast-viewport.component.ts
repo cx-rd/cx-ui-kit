@@ -1,15 +1,15 @@
-import { CommonModule } from '@angular/common';
 import {
     AfterViewInit,
     Component,
     DestroyRef,
     ElementRef,
-    EventEmitter,
-    Input,
     NgZone,
-    Output,
+    booleanAttribute,
+    computed,
     effect,
     inject,
+    input,
+    output,
     signal
 } from '@angular/core';
 import { ToastPosition } from '../../core/models';
@@ -19,15 +19,15 @@ import { ToastComponent } from './toast.component';
 @Component({
     selector: 'lib-toast-viewport',
     standalone: true,
-    imports: [CommonModule, ToastComponent],
+    imports: [ToastComponent],
     templateUrl: './toast-viewport.component.html',
     styleUrl: './toast-viewport.component.scss'
 })
 export class ToastViewportComponent implements AfterViewInit {
-    @Input() position?: ToastPosition;
-    @Input() pauseOnHover = true;
+    readonly position = input<ToastPosition | undefined>();
+    readonly pauseOnHover = input(true, { transform: booleanAttribute });
 
-    @Output() actionClick = new EventEmitter<{ id: string; actionId: string }>();
+    readonly actionClick = output<{ id: string; actionId: string }>();
 
     readonly toastService = inject(ToastService);
     readonly positionClasses = POSITION_CLASS_MAP;
@@ -39,17 +39,12 @@ export class ToastViewportComponent implements AfterViewInit {
     private resizeObserver?: ResizeObserver;
     private measureFrame?: number;
     private isViewReady = false;
-    private readonly toastWatcher = effect(() => {
-        this.toastService.toasts();
-        this.scheduleMeasure();
-    });
-
-    /** Groups active toasts by position so each viewport corner renders its own stack. */
-    get groups(): Array<[ToastPosition, ReturnType<typeof this.toastService.toasts>]> {
+    readonly groups = computed(() => {
         const grouped = new Map<ToastPosition, ReturnType<typeof this.toastService.toasts>>();
+        const position = this.position();
 
         for (const toast of this.toastService.toasts()) {
-            if (this.position && toast.position !== this.position) {
+            if (position && toast.position !== position) {
                 continue;
             }
 
@@ -58,21 +53,15 @@ export class ToastViewportComponent implements AfterViewInit {
         }
 
         return Array.from(grouped.entries());
-    }
+    });
+    private readonly toastWatcher = effect(() => {
+        this.groups();
+        this.scheduleMeasure();
+    });
 
     /** Keeps only the latest three toasts visible in each stack. */
     getStackedToasts(toasts: ReturnType<typeof this.toastService.toasts>): ReturnType<typeof this.toastService.toasts> {
         return [...toasts].reverse().slice(0, 3);
-    }
-
-    /** Keeps each stack container stable across change detection by tracking its position key. */
-    trackGroupPosition(_index: number, group: [ToastPosition, ReturnType<typeof this.toastService.toasts>]): ToastPosition {
-        return group[0];
-    }
-
-    /** Keeps each toast DOM node stable so hover does not retrigger from list re-creation. */
-    trackToastId(_index: number, toast: ReturnType<typeof this.toastService.toasts>[number]): string {
-        return toast.id;
     }
 
     /** Removes a toast from the service and viewport. */
@@ -125,7 +114,7 @@ export class ToastViewportComponent implements AfterViewInit {
             this.cancelCollapseCheck(position);
             this.setExpanded(position, true);
 
-            if (this.pauseOnHover) {
+            if (this.pauseOnHover()) {
                 this.toastService.pausePosition(position);
             }
 
@@ -197,7 +186,7 @@ export class ToastViewportComponent implements AfterViewInit {
                 const containsFocus = !!(stack && activeElement instanceof Node && stack.contains(activeElement));
 
                 if (!isHovered && !containsFocus) {
-                    if (this.pauseOnHover) {
+                    if (this.pauseOnHover()) {
                         this.toastService.resumePosition(position);
                     }
 
@@ -261,9 +250,7 @@ export class ToastViewportComponent implements AfterViewInit {
             const itemWidths = items.map(item => this.getItemWidth(item));
             const collapsedScales = items.map((_, index) => this.getCollapsedScale(index, isCompactViewport));
             const collapsedHeights = itemHeights.map((height, index) => height * collapsedScales[index]);
-            const collapsedOffsets = direction === 1
-                ? this.getCollapsedOffsets(collapsedHeights, collapsedStep)
-                : this.getCollapsedOffsets(collapsedHeights, collapsedStep);
+            const collapsedOffsets = this.getCollapsedOffsets(collapsedHeights, collapsedStep);
             const stackWidth = Math.max(...itemWidths);
 
             let expandedOffset = 0;

@@ -13,45 +13,64 @@
     <div class="actions">
         <div class="icon-btn" cdkOverlayOrigin #notiTrigger="cdkOverlayOrigin" (click)="toggleNotifications()">
             <span class="material-icons">notifications_none</span>
-            <span *ngIf="notifications().length > 0" class="badge"></span>
+            @if (notifications().length > 0) {
+                <span class="badge"></span>
+            }
         </div>
         <div class="profile-btn" cdkOverlayOrigin #userMenuTrigger="cdkOverlayOrigin" (click)="toggleUserMenu()">
             <span class="material-icons">account_circle</span>
         </div>
     </div>
 
-    <!-- Notification Popover Overlay -->
-    <ng-template cdkConnectedOverlay [cdkConnectedOverlayOrigin]="notiTrigger"
-        [cdkConnectedOverlayOpen]="isNotificationOpen()" [cdkConnectedOverlayHasBackdrop]="true"
+    <ng-template
+        cdkConnectedOverlay
+        [cdkConnectedOverlayOrigin]="notiTrigger"
+        [cdkConnectedOverlayOpen]="isNotificationOpen()"
+        [cdkConnectedOverlayHasBackdrop]="true"
         cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
-        [cdkConnectedOverlayPanelClass]="'tp-ui-overlay-pane'" (backdropClick)="isNotificationOpen.set(false)"
-        (detach)="isNotificationOpen.set(false)">
-        <div class="notification-popover-wrapper" cdkOverlayOrigin #popoverRef="cdkOverlayOrigin">
-            <lib-notification-popover [notifications]="notifications()" (markAllAsRead)="onMarkAllAsRead()"
-                (viewDetail)="onViewNotificationDetail($event)" (hoverItem)="onNotificationHover($event)">
+        [cdkConnectedOverlayPanelClass]="'tp-ui-overlay-pane'"
+        (backdropClick)="closeNotifications()"
+        (detach)="closeNotifications()">
+        <div class="notification-popover-wrapper">
+            <lib-notification-popover
+                [notifications]="notifications()"
+                (markAllAsRead)="onMarkAllAsRead()"
+                (viewDetail)="onViewNotificationDetail($event)"
+                (hoverItem)="onNotificationHover($event)">
             </lib-notification-popover>
 
-            <!-- Notification Preview Side Panel - Now relative to the hovered item element -->
-            <ng-template *ngIf="hoveredElement()" cdkConnectedOverlay [cdkConnectedOverlayOrigin]="hoveredElement()!"
-                [cdkConnectedOverlayOpen]="!!hoveredNotification()" [cdkConnectedOverlayPositions]="previewPositions">
-                <lib-notification-preview [notification]="hoveredNotification()"></lib-notification-preview>
-            </ng-template>
+            @if (hoveredElement(); as hoveredOrigin) {
+                <ng-template
+                    cdkConnectedOverlay
+                    [cdkConnectedOverlayOrigin]="hoveredOrigin"
+                    [cdkConnectedOverlayOpen]="!!hoveredNotification()"
+                    [cdkConnectedOverlayPositions]="previewPositions">
+                    <lib-notification-preview [notification]="hoveredNotification()"></lib-notification-preview>
+                </ng-template>
+            }
         </div>
     </ng-template>
 
-    <!-- User Menu Overlay -->
-    <ng-template cdkConnectedOverlay [cdkConnectedOverlayOrigin]="userMenuTrigger"
-        [cdkConnectedOverlayOpen]="isUserMenuOpen()" [cdkConnectedOverlayHasBackdrop]="true"
+    <ng-template
+        cdkConnectedOverlay
+        [cdkConnectedOverlayOrigin]="userMenuTrigger"
+        [cdkConnectedOverlayOpen]="isUserMenuOpen()"
+        [cdkConnectedOverlayHasBackdrop]="true"
         cdkConnectedOverlayBackdropClass="cdk-overlay-transparent-backdrop"
-        [cdkConnectedOverlayPanelClass]="'tp-ui-overlay-pane'" (backdropClick)="isUserMenuOpen.set(false)"
-        (detach)="isUserMenuOpen.set(false)">
-        <lib-user-menu [userInfo]="userInfo()" [customActions]="customActions()"
+        [cdkConnectedOverlayPanelClass]="'tp-ui-overlay-pane'"
+        (backdropClick)="closeUserMenu()"
+        (detach)="closeUserMenu()">
+        <lib-user-menu
+            [userInfo]="userInfo()"
+            [customActions]="customActions()"
             (actionClick)="onUserMenuAction($event)">
         </lib-user-menu>
     </ng-template>
 
-    <!-- Detail Modal -->
-    <lib-notification-detail-modal *ngIf="selectedNotification()" [notification]="selectedNotification()"
-        (close)="closeDetailModal()">
-    </lib-notification-detail-modal>
+    @if (selectedNotification()) {
+        <lib-notification-detail-modal
+            [notification]="selectedNotification()"
+            (close)="closeDetailModal()">
+        </lib-notification-detail-modal>
+    }
 </div>

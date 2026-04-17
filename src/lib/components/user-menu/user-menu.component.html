@@ -1,30 +1,37 @@
 <div class="user-menu-container tp-ui-overlay-pane">
   <div class="popover-arrow"></div>
-  <!-- Header: User Info -->
-  <div class="menu-header" *ngIf="userInfo">
-    <div class="avatar-container">
-      <img *ngIf="userInfo.avatarUrl" [src]="userInfo.avatarUrl" [alt]="userInfo.name" class="avatar">
-      <span *ngIf="!userInfo.avatarUrl" class="material-icons avatar-placeholder">account_circle</span>
-    </div>
-    <div class="user-details">
-      <div class="user-name">{{ userInfo.name }}</div>
-      <div class="user-email">{{ userInfo.email }}</div>
-    </div>
-  </div>
 
-  <!-- Body: Dynamic Actions -->
-  <div class="menu-body" *ngIf="customActions.length > 0">
-    <div *ngFor="let action of customActions" class="menu-item" (click)="onActionClick(action.id)">
-      <span class="material-icons item-icon" [style.color]="action.color">{{ action.icon }}</span>
-      <span class="item-label">{{ action.label }}</span>
+  @if (userInfo(); as profile) {
+    <div class="menu-header">
+      <div class="avatar-container">
+        @if (profile.avatarUrl) {
+          <img [src]="profile.avatarUrl" [alt]="profile.name" class="avatar">
+        } @else {
+          <span class="material-icons avatar-placeholder">account_circle</span>
+        }
+      </div>
+      <div class="user-details">
+        <div class="user-name">{{ profile.name }}</div>
+        <div class="user-email">{{ profile.email }}</div>
+      </div>
     </div>
-  </div>
+  }
 
-  <!-- Footer: Standard Actions -->
+  @if (customActions().length > 0) {
+    <div class="menu-body">
+      @for (action of customActions(); track action.id) {
+        <div class="menu-item" (click)="onActionClick(action.id)">
+          <span class="material-icons item-icon" [style.color]="action.color">{{ action.icon }}</span>
+          <span class="item-label">{{ action.label }}</span>
+        </div>
+      }
+    </div>
+  }
+
   <div class="menu-footer">
     <div class="menu-item" (click)="onActionClick('settings')">
       <span class="material-icons item-icon">settings</span>
-      <span class="item-label">設定</span>
+      <span class="item-label">Settings</span>
     </div>
     <div class="menu-item logout-item" (click)="onActionClick('logout')">
       <span class="material-icons item-icon logout-icon">logout</span>

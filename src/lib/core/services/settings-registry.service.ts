@@ -4,8 +4,8 @@ import { SettingsTab, SettingsSection } from '../models/settings.models';
 
 @Injectable()
 export class SettingsRegistryService {
-    private rawTabs = inject(SETTINGS_TABS, { optional: true }) || [];
-    private rawSections = inject(SETTINGS_SECTIONS, { optional: true }) || [];
+    private readonly rawTabs = inject(SETTINGS_TABS, { optional: true }) ?? [];
+    private readonly rawSections = inject(SETTINGS_SECTIONS, { optional: true }) ?? [];
 
     /**
      * Get all registered tabs, sorted by 'order'
@@ -24,13 +24,13 @@ export class SettingsRegistryService {
             .sort((a, b) => (a.order ?? 99) - (b.order ?? 99));
     }
 
-    private flatten<T>(items: any[]): T[] {
+    private flatten<T>(items: ReadonlyArray<T | ReadonlyArray<T>>): T[] {
         const result: T[] = [];
-        items.forEach(item => {
+        items.forEach((item) => {
             if (Array.isArray(item)) {
                 result.push(...item);
             } else {
-                result.push(item);
+                result.push(item as T);
             }
         });
         return result;

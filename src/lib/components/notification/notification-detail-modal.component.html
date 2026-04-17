@@ -1,44 +1,48 @@
 <div class="modal-backdrop" (click)="onClose()"></div>
-<div class="modal-container" *ngIf="notification">
-    <div class="modal-header">
-        <div class="header-info">
-            <div class="type-container">
-                <span class="material-icons icon-type" [class.alert]="notification.type === 'alert'"
-                    [class.update]="notification.type === 'update'">
-                    {{ notification.type === 'alert' ? 'report' : 'info' }}
-                </span>
-                <span class="type-label" [class.alert]="notification.type === 'alert'">
-                    {{ notification.type === 'alert' ? 'SYSTEM ALERT' : 'PROJECT UPDATE' }}
-                </span>
+@if (notification(); as item) {
+    <div class="modal-container">
+        <div class="modal-header">
+            <div class="header-info">
+                <div class="type-container">
+                    <span class="material-icons icon-type" [class.alert]="item.type === 'alert'"
+                        [class.update]="item.type === 'update'">
+                        {{ item.type === 'alert' ? 'report' : 'info' }}
+                    </span>
+                    <span class="type-label" [class.alert]="item.type === 'alert'">
+                        {{ item.type === 'alert' ? 'SYSTEM ALERT' : 'PROJECT UPDATE' }}
+                    </span>
+                </div>
+                <h2 class="modal-title">{{ item.title }}</h2>
+                @if (item.sender) {
+                    <div class="sender-info">
+                        <span class="sender-label">From: </span>
+                        <span>{{ item.sender }}</span>
+                        <span class="time">{{ item.time | relativeTime }}</span>
+                    </div>
+                }
             </div>
-            <h2 class="modal-title">{{ notification.title }}</h2>
-            <div class="sender-info" *ngIf="notification.sender">
-                <span class="sender-label">From: </span>
-                <span>{{ notification.sender }}</span>
-                <span class="time">{{ notification.time | relativeTime }}</span>
+            <button class="close-btn" (click)="onClose()">
+                <span class="material-icons">close</span>
+            </button>
+        </div>
+
+        <div class="modal-body">
+            <div class="section-summary">
+                @if (item.imageUrl) {
+                    <div class="summary-image">
+                        <img [src]="item.imageUrl" alt="Preview">
+                    </div>
+                }
+                <div class="summary-text">
+                    <p>{{ item.summary }}</p>
+                </div>
+            </div>
+
+            <hr class="section-divider">
+
+            <div class="section-content">
+                <p>{{ item.fullContent }}</p>
             </div>
         </div>
-        <button class="close-btn" (click)="onClose()">
-            <span class="material-icons">close</span>
-        </button>
     </div>
-
-    <div class="modal-body">
-        <!-- Part 1: Image + Summary -->
-        <div class="section-summary">
-            <div *ngIf="notification.imageUrl" class="summary-image">
-                <img [src]="notification.imageUrl" alt="Preview">
-            </div>
-            <div class="summary-text">
-                <p>{{ notification.summary }}</p>
-            </div>
-        </div>
-
-        <hr class="section-divider">
-
-        <!-- Part 2: Full Content -->
-        <div class="section-content">
-            <p>{{ notification.fullContent }}</p>
-        </div>
-    </div>
-</div>
+}

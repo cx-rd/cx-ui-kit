@@ -1,4 +1,4 @@
-@import '../../core/styles/tokens/index';
+@use '../../core/styles/tokens' as *;
 
 .notification-popover {
     width: 350px; // Reduced from 400px

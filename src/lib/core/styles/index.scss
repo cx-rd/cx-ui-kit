@@ -1,12 +1,8 @@
 // 1. Core Dependencies (CDK Overlay Base)
 @import '@angular/cdk/overlay-prebuilt.css';
 
-// 2. Design Tokens
-@import './tokens/index';
-
-// 3. Isolated Component Scoping (Overlays, etc.)
-@import './globals/overlay';
-@import './globals/z-index';
+// 2. Isolated Component Scoping (Overlays, etc.)
+@use './globals/overlay';
 
 // Note: Components retain their own scoped styles for layout/color.
 // This file only handles styles that MUST escape component scoping (like body-appended overlays).

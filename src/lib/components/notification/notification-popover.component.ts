@@ -1,36 +1,35 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, input, output } from '@angular/core';
 import { NotificationItem } from '../../core/models';
 import { RelativeTimePipe } from '../../core/pipes/relative-time.pipe';
 
 @Component({
     selector: 'lib-notification-popover',
     standalone: true,
-    imports: [CommonModule, RelativeTimePipe],
+    imports: [RelativeTimePipe],
     templateUrl: './notification-popover.component.html',
     styleUrl: './notification-popover.component.scss'
 })
 export class NotificationPopoverComponent {
-    @Input() notifications: NotificationItem[] = [];
+    readonly notifications = input<NotificationItem[]>([]);
 
-    @Output() markAllAsRead = new EventEmitter<void>();
-    @Output() viewDetail = new EventEmitter<NotificationItem>();
-    @Output() hoverItem = new EventEmitter<{ notification: NotificationItem | null, element: HTMLElement | null }>();
+    readonly markAllAsRead = output<void>();
+    readonly viewDetail = output<NotificationItem>();
+    readonly hoverItem = output<{ notification: NotificationItem | null; element: HTMLElement | null }>();
 
-    onMarkAllAsRead() {
+    onMarkAllAsRead(): void {
         this.markAllAsRead.emit();
     }
 
-    onItemClick(notification: NotificationItem) {
+    onItemClick(notification: NotificationItem): void {
         this.viewDetail.emit(notification);
     }
 
-    onItemMouseEnter(notification: NotificationItem, event: MouseEvent) {
+    onItemMouseEnter(notification: NotificationItem, event: MouseEvent): void {
         const element = event.currentTarget as HTMLElement;
         this.hoverItem.emit({ notification, element });
     }
 
-    onItemMouseLeave() {
+    onItemMouseLeave(): void {
         this.hoverItem.emit({ notification: null, element: null });
     }
 }

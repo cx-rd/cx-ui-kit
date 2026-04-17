@@ -1,4 +1,5 @@
-@import './z-index';
+@use '../tokens' as *;
+@use './z-index' as *;
 
 /**
  * Isolated Overlay Panel Classes for UI-kit

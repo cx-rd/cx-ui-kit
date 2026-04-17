@@ -1,2 +1,2 @@
-@import 'z-index';
-@import 'overlay';
+@forward 'z-index';
+@use 'overlay';

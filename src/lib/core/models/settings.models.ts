@@ -1,3 +1,5 @@
+import { Type } from '@angular/core';
+
 export interface SettingsTab {
     id: string;
     label: string;
@@ -10,7 +12,7 @@ export interface SettingsSection {
     tabId: string;
     icon?: string;
     order?: number;
-    component?: any; // Standalone component class
+    component?: Type<unknown>;
 }
 
 export interface SettingsContent {

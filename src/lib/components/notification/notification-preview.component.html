@@ -1,20 +1,24 @@
-<div class="notification-preview tp-ui-overlay-pane" *ngIf="notification">
-    <div class="preview-header">
-        <span class="material-icons icon-type" [class.alert]="notification.type === 'alert'"
-            [class.update]="notification.type === 'update'">
-            {{ notification.type === 'alert' ? 'report' : 'info' }}
-        </span>
-        <span class="type-label">{{ notification.type === 'alert' ? 'System Alert' : 'Project Update' }}</span>
-    </div>
-
-    <h2 class="preview-title">{{ notification.title }}</h2>
-
-    <div class="preview-body">
-        <div *ngIf="notification.imageUrl" class="preview-image">
-            <img [src]="notification.imageUrl" alt="Preview">
+@if (notification(); as item) {
+    <div class="notification-preview tp-ui-overlay-pane">
+        <div class="preview-header">
+            <span class="material-icons icon-type" [class.alert]="item.type === 'alert'"
+                [class.update]="item.type === 'update'">
+                {{ item.type === 'alert' ? 'report' : 'info' }}
+            </span>
+            <span class="type-label">{{ item.type === 'alert' ? 'System Alert' : 'Project Update' }}</span>
         </div>
-        <div class="preview-summary">
-            <p>{{ notification.summary }}</p>
+
+        <h2 class="preview-title">{{ item.title }}</h2>
+
+        <div class="preview-body">
+            @if (item.imageUrl) {
+                <div class="preview-image">
+                    <img [src]="item.imageUrl" alt="Preview">
+                </div>
+            }
+            <div class="preview-summary">
+                <p>{{ item.summary }}</p>
+            </div>
         </div>
     </div>
-</div>
+}

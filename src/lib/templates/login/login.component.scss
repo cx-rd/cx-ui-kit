@@ -1,5 +1,5 @@
-@import '../../core/styles/globals/z-index';
-@import '../../core/styles/tokens/index';
+@use '../../core/styles/globals/z-index' as *;
+@use '../../core/styles/tokens' as *;
 
 :host {
   display: flex;

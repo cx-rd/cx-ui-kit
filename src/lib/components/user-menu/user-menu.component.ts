@@ -1,21 +1,20 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, input, output } from '@angular/core';
 import { UserInfo, UserMenuAction } from '../../core/models';
 
 @Component({
     selector: 'lib-user-menu',
     standalone: true,
-    imports: [CommonModule],
+    imports: [],
     templateUrl: './user-menu.component.html',
     styleUrl: './user-menu.component.scss'
 })
 export class UserMenuComponent {
-    @Input() userInfo: UserInfo | null = null;
-    @Input() customActions: UserMenuAction[] = [];
+    readonly userInfo = input<UserInfo | null>(null);
+    readonly customActions = input<UserMenuAction[]>([]);
 
-    @Output() actionClick = new EventEmitter<string>();
+    readonly actionClick = output<string>();
 
-    onActionClick(actionId: string) {
+    onActionClick(actionId: string): void {
         this.actionClick.emit(actionId);
     }
 }

@@ -1,4 +1,4 @@
-@import '../../core/styles/tokens/index';
+@use '../../core/styles/tokens' as *;
 
 .all-notifications-container {
     padding: 0; // Remove container-level padding to allow sticky flush

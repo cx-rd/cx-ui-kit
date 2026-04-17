@@ -1,9 +1,8 @@
 <div class="container">
   <div class="login-frame">
-    <!-- Note: logo path might need adjustment based on final project structure -->
-    <img src="assets/Logo_eng.svg"/>
+    <img src="assets/Logo_eng.svg" alt="CX RD logo">
     <h1 class="title">Welcome Back</h1>
-    <span class="description">Please enter your detail to sign in</span>
+    <span class="description">Please enter your details to sign in</span>
 
     <form
       class="login-form"
@@ -11,21 +10,28 @@
       (ngSubmit)="login()"
     >
       <div class="account">
-        <label>Account</label>
-        <input type="text" placeholder="Enter your account" formControlName="account" />
+        <label for="login-account">Account</label>
+        <input
+          id="login-account"
+          type="text"
+          placeholder="Enter your account"
+          autocomplete="username"
+          formControlName="account" />
       </div>
 
       <div class="password">
-        <label>Password</label>
+        <label for="login-password">Password</label>
         <span>Forgot?</span>
         <input
+          id="login-password"
           type="password"
           placeholder="Enter your password"
+          autocomplete="current-password"
           formControlName="password"
         />
       </div>
 
-      <button class="login-btn" type="submit" [disabled]="form.invalid">Sign In ⭢</button>
+      <button class="login-btn" type="submit" [disabled]="form.invalid">Sign In</button>
     </form>
   </div>
 </div>

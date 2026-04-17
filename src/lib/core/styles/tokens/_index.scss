@@ -1,5 +1,5 @@
-@import 'colors';
-@import 'radius';
-@import 'shadows';
-@import 'spacing';
-@import 'component-tokens';
+@forward 'colors';
+@forward 'radius';
+@forward 'shadows';
+@forward 'spacing';
+@forward 'component-tokens';

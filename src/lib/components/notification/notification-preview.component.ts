@@ -1,14 +1,13 @@
-import { Component, Input } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, input } from '@angular/core';
 import { NotificationItem } from '../../core/models';
 
 @Component({
     selector: 'lib-notification-preview',
     standalone: true,
-    imports: [CommonModule],
+    imports: [],
     templateUrl: './notification-preview.component.html',
     styleUrl: './notification-preview.component.scss'
 })
 export class NotificationPreviewComponent {
-    @Input() notification: NotificationItem | null = null;
+    readonly notification = input<NotificationItem | null>(null);
 }

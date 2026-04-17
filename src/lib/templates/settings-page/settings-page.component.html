@@ -5,40 +5,44 @@
     </header>
 
     <nav class="settings-tabs">
-        <div *ngFor="let tab of tabs()" class="settings-tab" [class.active]="activeTabId() === tab.id"
-            (click)="selectTab(tab.id)">
-            {{ tab.label }}
-        </div>
+        @for (tab of tabs(); track tab.id) {
+            <div class="settings-tab" [class.active]="activeTabId() === tab.id" (click)="selectTab(tab.id)">
+                {{ tab.label }}
+            </div>
+        }
     </nav>
 
     <div class="settings-layout">
         <aside class="settings-sidebar">
-            <div *ngFor="let section of sections()" class="section-item"
-                [class.active]="activeSectionId() === section.id" (click)="handleSectionClick(section.id)">
-                <i *ngIf="section.icon" class="material-icons">{{ section.icon }}</i>
-                <span class="section-label">{{ section.label }}</span>
-            </div>
+            @for (section of sections(); track section.id) {
+                <div
+                    class="section-item"
+                    [class.active]="activeSectionId() === section.id"
+                    (click)="handleSectionClick(section.id)">
+                    @if (section.icon) {
+                        <i class="material-icons">{{ section.icon }}</i>
+                    }
+                    <span class="section-label">{{ section.label }}</span>
+                </div>
+            }
         </aside>
 
         <main class="settings-content" #scrollContainer>
-            <!-- We don't need a dynamic header here if sections are scrolled -->
-            <!-- But we keep it as a sticky header if needed, or remove it per requirement -->
-            <!-- The user said: "旁边的选单则是用来scroll到那个部分" -->
             <div class="content-body" #contentArea>
                 <div class="sections-container">
                     @for (section of sections(); track section.id) {
-                    <section [id]="section.id" class="settings-section-item">
-                        <div class="settings-card-container">
-                        @if (section.component) {
-                            <ng-container *ngComponentOutlet="section.component"></ng-container>
-                        } @else {
-                            <div class="placeholder-card">
-                                <h3>{{ section.label }}</h3>
-                                <p>No component provided for this section.</p>
+                        <section [id]="section.id" class="settings-section-item">
+                            <div class="settings-card-container">
+                                @if (section.component) {
+                                    <ng-container *ngComponentOutlet="section.component"></ng-container>
+                                } @else {
+                                    <div class="placeholder-card">
+                                        <h3>{{ section.label }}</h3>
+                                        <p>No component provided for this section.</p>
+                                    </div>
+                                }
                             </div>
-                        }
-                        </div>
-                    </section>
+                        </section>
                     }
                 </div>
                 <ng-content></ng-content>

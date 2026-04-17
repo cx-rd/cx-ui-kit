@@ -1,34 +1,43 @@
 <article
     class="toast"
-    [class.toast--loading]="toast.variant === 'loading'"
-    [ngClass]="toast.className"
-    [ngStyle]="hostStyles"
+    [class]="toastClassName()"
+    [class.toast--loading]="toast().variant === 'loading'"
+    [ngStyle]="hostStyles()"
     (mouseenter)="onHover(true)"
     (mouseleave)="onHover(false)">
 
-    <div class="toast__icon" *ngIf="toast.showIcon" aria-hidden="true">
-        <svg viewBox="0 0 24 24" focusable="false">
-            <path [attr.d]="iconSvg"></path>
-        </svg>
-    </div>
+    @if (toast().showIcon) {
+        <div class="toast__icon" aria-hidden="true">
+            <svg viewBox="0 0 24 24" focusable="false">
+                <path [attr.d]="iconSvg()"></path>
+            </svg>
+        </div>
+    }
 
     <div class="toast__body">
-        <p class="toast__label" *ngIf="toast.label">{{ toast.label }}</p>
-        <h4 class="toast__title">{{ toast.title }}</h4>
-        <p class="toast__message" *ngIf="toast.message">{{ toast.message }}</p>
+        @if (toast().label) {
+            <p class="toast__label">{{ toast().label }}</p>
+        }
+        <h4 class="toast__title">{{ toast().title }}</h4>
+        @if (toast().message) {
+            <p class="toast__message">{{ toast().message }}</p>
+        }
 
-        <button
-            *ngIf="toast.action"
-            type="button"
-            class="toast__action"
-            [class.toast__action--ghost]="toast.action.appearance !== 'solid'"
-            (click)="onAction(toast.action)">
-            {{ toast.action.label }}
-        </button>
+        @if (toast().action; as action) {
+            <button
+                type="button"
+                class="toast__action"
+                [class.toast__action--ghost]="action.appearance !== 'solid'"
+                (click)="onAction(action)">
+                {{ action.label }}
+            </button>
+        }
     </div>
 
-    <button *ngIf="toast.closable" type="button" class="toast__close" aria-label="Dismiss toast" (click)="onDismiss()">
-        <span></span>
-        <span></span>
-    </button>
+    @if (toast().closable) {
+        <button type="button" class="toast__close" aria-label="Dismiss toast" (click)="onDismiss()">
+            <span></span>
+            <span></span>
+        </button>
+    }
 </article>

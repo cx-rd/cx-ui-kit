@@ -1,55 +1,60 @@
 import {
+    AfterViewInit,
     Component,
+    DestroyRef,
+    ElementRef,
+    computed,
+    effect,
+    inject,
     input,
     output,
-    computed,
-    ElementRef,
-    viewChild,
-    AfterViewInit,
-    OnDestroy,
-    effect,
-    inject
+    viewChild
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { NgComponentOutlet } from '@angular/common';
 import { SettingsRegistryService } from '../../core/services/settings-registry.service';
 
 @Component({
     selector: 'lib-settings-page',
     standalone: true,
-    imports: [CommonModule],
+    imports: [NgComponentOutlet],
     templateUrl: './settings-page.component.html',
     styleUrl: './settings-page.component.scss',
     providers: [SettingsRegistryService]
 })
-export class SettingsPageComponent implements AfterViewInit, OnDestroy {
-    private registry = inject(SettingsRegistryService);
+export class SettingsPageComponent implements AfterViewInit {
+    private readonly registry = inject(SettingsRegistryService);
+    private readonly destroyRef = inject(DestroyRef);
 
-    title = input<string>('Settings');
-    saveButtonLabel = input<string>('Save Changes');
+    readonly title = input<string>('Settings');
+    readonly saveButtonLabel = input<string>('Save Changes');
 
-    activeTabId = input<string | null>(null);
-    activeSectionId = input<string | null>(null);
+    readonly activeTabId = input<string | null>(null);
+    readonly activeSectionId = input<string | null>(null);
 
-    tabs = computed(() => this.registry.getTabs());
-    sections = computed(() => {
+    readonly tabs = computed(() => this.registry.getTabs());
+    readonly sections = computed(() => {
         const tabId = this.activeTabId();
         return tabId ? this.registry.getSectionsByTab(tabId) : [];
     });
 
-    scrollContainer = viewChild<ElementRef<HTMLElement>>('scrollContainer');
-    contentArea = viewChild<ElementRef<HTMLElement>>('contentArea');
+    readonly scrollContainer = viewChild<ElementRef<HTMLElement>>('scrollContainer');
+    readonly contentArea = viewChild<ElementRef<HTMLElement>>('contentArea');
 
-    tabChange = output<string>();
-    sectionClick = output<string>();
-    sectionScroll = output<string>();
-    save = output<void>();
+    readonly tabChange = output<string>();
+    readonly sectionClick = output<string>();
+    readonly sectionScroll = output<string>();
+    readonly save = output<void>();
 
     private observer: IntersectionObserver | null = null;
+    private cleanupScrollListener: (() => void) | null = null;
+    private cleanupScrollEndListener: (() => void) | null = null;
     private isUserScrolling = true;
     private lastEmittedId: string | null = null;
+    private observerSetupTimer: ReturnType<typeof setTimeout> | null = null;
+    private scrollRestoreTimer: ReturnType<typeof setTimeout> | null = null;
+    private scrollToSectionTimer: ReturnType<typeof setTimeout> | null = null;
 
     constructor() {
-        // Effect to handle tab changes: Reset scroll position
         effect(() => {
             const tabId = this.activeTabId();
             if (tabId) {
@@ -60,125 +65,75 @@ export class SettingsPageComponent implements AfterViewInit, OnDestroy {
             }
         });
 
-        // Effect to handle section changes: Focus and Observation
         effect(() => {
             const currentSections = this.sections();
-            if (currentSections.length > 0) {
-                const currentId = this.activeSectionId();
-                const isValid = currentSections.some(s => s.id === currentId);
+            const currentId = this.activeSectionId();
 
-                if (!currentId || !isValid) {
-                    this.emitSectionScroll(currentSections[0].id);
-                }
-                
-                // Allow view to render then setup observer and possibly scroll
-                setTimeout(() => {
-                    this.setupIntersectionObserver();
-                    
-                    // If we have a valid ID that didn't come from a scroll event (e.g., Refresh or Tab switch)
-                    // Trigger manual scroll to it
-                    const id = this.activeSectionId();
-                    if (id && id !== this.lastEmittedId && isValid) {
-                        this.scrollToSection(id);
-                    }
-                }, 100);
+            if (!currentSections.length) {
+                this.cleanupObserver();
+                return;
+            }
+
+            const isValid = currentSections.some((section) => section.id === currentId);
+            if (!currentId || !isValid) {
+                this.emitSectionScroll(currentSections[0].id);
+            }
+
+            this.scheduleObserverRefresh();
+
+            if (currentId && currentId !== this.lastEmittedId && isValid) {
+                this.scheduleScrollToSection(currentId);
             }
         });
 
-        // Handle external section selection (Direct input change)
         effect(() => {
+            const currentSections = this.sections();
             const id = this.activeSectionId();
-            if (id && id !== this.lastEmittedId) {
-                const currentSections = this.sections();
-                if (currentSections.some(s => s.id === id)) {
-                    this.scrollToSection(id);
-                }
+
+            if (!id || id === this.lastEmittedId) {
+                return;
             }
-        });
-    }
 
-    ngAfterViewInit() {
-        // Handled by effects mostly, but ensure observer is ready
-        setTimeout(() => this.setupIntersectionObserver(), 200);
-    }
-
-    ngOnDestroy() {
-        this.cleanupObserver();
-    }
-
-    private cleanupObserver() {
-        if (this.observer) {
-            this.observer.disconnect();
-            this.observer = null;
-        }
-    }
-
-    private setupIntersectionObserver() {
-        this.cleanupObserver();
-
-        const scrollRoot = this.scrollContainer()?.nativeElement;
-        const content = this.contentArea()?.nativeElement;
-
-        if (!scrollRoot || !content) return;
-
-        const options = {
-            root: scrollRoot,
-            rootMargin: '-5% 0px -75% 0px',
-            threshold: 0
-        };
-
-        this.observer = new IntersectionObserver((entries) => {
-            if (!this.isUserScrolling) return;
-
-            const intersectingEntry = entries.find(entry => entry.isIntersecting);
-            if (intersectingEntry) {
-                this.emitSectionScroll((intersectingEntry.target as HTMLElement).id);
-            }
-        }, options);
-
-        this.sections().forEach(section => {
-            const element = content.querySelector<HTMLElement>(`#${section.id}`);
-            if (element) {
-                this.observer?.observe(element);
+            if (currentSections.some((section) => section.id === id)) {
+                this.scheduleScrollToSection(id);
             }
         });
 
-        scrollRoot.addEventListener('scroll', () => {
-            if (!this.isUserScrolling) return;
-            
-            if (scrollRoot.scrollTop < 10) {
-                const firstSection = this.sections()[0];
-                if (firstSection && this.activeSectionId() !== firstSection.id) {
-                    this.emitSectionScroll(firstSection.id);
-                }
-            }
-        }, { passive: true });
+        this.destroyRef.onDestroy(() => {
+            this.clearPendingTimers();
+            this.cleanupObserver();
+            this.cleanupScrollEndListener?.();
+        });
     }
 
-    private emitSectionScroll(id: string) {
-        this.lastEmittedId = id;
-        this.sectionScroll.emit(id);
+    ngAfterViewInit(): void {
+        this.scheduleObserverRefresh();
     }
 
-    selectTab(id: string) {
+    selectTab(id: string): void {
         this.tabChange.emit(id);
     }
 
-    handleSectionClick(id: string) {
+    handleSectionClick(id: string): void {
         this.lastEmittedId = id;
         this.sectionClick.emit(id);
         this.scrollToSection(id);
     }
 
-    scrollToSection(id: string) {
+    scrollToSection(id: string): void {
         const scrollRoot = this.scrollContainer()?.nativeElement;
         const content = this.contentArea()?.nativeElement;
 
-        if (!scrollRoot || !content) return;
+        if (!scrollRoot || !content) {
+            return;
+        }
 
         const element = content.querySelector<HTMLElement>(`#${id}`);
-        if (!element) return;
+        if (!element) {
+            return;
+        }
 
+        this.cleanupScrollEndListener?.();
         this.isUserScrolling = false;
 
         const targetTop =
@@ -187,28 +142,145 @@ export class SettingsPageComponent implements AfterViewInit, OnDestroy {
             scrollRoot.scrollTop -
             20;
 
+        const restoreUserScrolling = () => {
+            this.isUserScrolling = true;
+            this.cleanupScrollEndListener?.();
+            this.cleanupScrollEndListener = null;
+        };
+
+        const onScrollEnd = () => {
+            if (this.scrollRestoreTimer) {
+                clearTimeout(this.scrollRestoreTimer);
+            }
+
+            this.scrollRestoreTimer = setTimeout(() => {
+                this.scrollRestoreTimer = null;
+                restoreUserScrolling();
+            }, 100);
+        };
+
+        scrollRoot.addEventListener('scroll', onScrollEnd);
+        this.cleanupScrollEndListener = () => scrollRoot.removeEventListener('scroll', onScrollEnd);
+
         scrollRoot.scrollTo({
             top: targetTop,
             behavior: 'smooth'
         });
 
-        let scrollTimeout: any;
-        const onScrollEnd = () => {
-            clearTimeout(scrollTimeout);
-            scrollTimeout = setTimeout(() => {
-                this.isUserScrolling = true;
-                scrollRoot.removeEventListener('scroll', onScrollEnd);
-            }, 100);
-        };
-        scrollRoot.addEventListener('scroll', onScrollEnd);
-        
-        setTimeout(() => {
-            this.isUserScrolling = true;
-            scrollRoot.removeEventListener('scroll', onScrollEnd);
+        if (this.scrollRestoreTimer) {
+            clearTimeout(this.scrollRestoreTimer);
+        }
+
+        this.scrollRestoreTimer = setTimeout(() => {
+            this.scrollRestoreTimer = null;
+            restoreUserScrolling();
         }, 1000);
     }
 
-    onSave() {
+    onSave(): void {
         this.save.emit();
+    }
+
+    private scheduleObserverRefresh(delay = 0): void {
+        if (this.observerSetupTimer) {
+            clearTimeout(this.observerSetupTimer);
+        }
+
+        this.observerSetupTimer = setTimeout(() => {
+            this.observerSetupTimer = null;
+            this.setupIntersectionObserver();
+        }, delay);
+    }
+
+    private scheduleScrollToSection(id: string): void {
+        if (this.scrollToSectionTimer) {
+            clearTimeout(this.scrollToSectionTimer);
+        }
+
+        this.scrollToSectionTimer = setTimeout(() => {
+            this.scrollToSectionTimer = null;
+            this.scrollToSection(id);
+        }, 0);
+    }
+
+    private cleanupObserver(): void {
+        this.cleanupScrollListener?.();
+        this.cleanupScrollListener = null;
+
+        if (this.observer) {
+            this.observer.disconnect();
+            this.observer = null;
+        }
+    }
+
+    private setupIntersectionObserver(): void {
+        this.cleanupObserver();
+
+        const scrollRoot = this.scrollContainer()?.nativeElement;
+        const content = this.contentArea()?.nativeElement;
+
+        if (!scrollRoot || !content) {
+            return;
+        }
+
+        this.observer = new IntersectionObserver((entries) => {
+            if (!this.isUserScrolling) {
+                return;
+            }
+
+            const intersectingEntry = entries.find((entry) => entry.isIntersecting);
+            if (intersectingEntry) {
+                this.emitSectionScroll((intersectingEntry.target as HTMLElement).id);
+            }
+        }, {
+            root: scrollRoot,
+            rootMargin: '-5% 0px -75% 0px',
+            threshold: 0
+        });
+
+        for (const section of this.sections()) {
+            const element = content.querySelector<HTMLElement>(`#${section.id}`);
+            if (element) {
+                this.observer.observe(element);
+            }
+        }
+
+        const onScroll = () => {
+            if (!this.isUserScrolling) {
+                return;
+            }
+
+            if (scrollRoot.scrollTop < 10) {
+                const firstSection = this.sections()[0];
+                if (firstSection && this.activeSectionId() !== firstSection.id) {
+                    this.emitSectionScroll(firstSection.id);
+                }
+            }
+        };
+
+        scrollRoot.addEventListener('scroll', onScroll, { passive: true });
+        this.cleanupScrollListener = () => scrollRoot.removeEventListener('scroll', onScroll);
+    }
+
+    private emitSectionScroll(id: string): void {
+        this.lastEmittedId = id;
+        this.sectionScroll.emit(id);
+    }
+
+    private clearPendingTimers(): void {
+        if (this.observerSetupTimer) {
+            clearTimeout(this.observerSetupTimer);
+            this.observerSetupTimer = null;
+        }
+
+        if (this.scrollRestoreTimer) {
+            clearTimeout(this.scrollRestoreTimer);
+            this.scrollRestoreTimer = null;
+        }
+
+        if (this.scrollToSectionTimer) {
+            clearTimeout(this.scrollToSectionTimer);
+            this.scrollToSectionTimer = null;
+        }
     }
 }

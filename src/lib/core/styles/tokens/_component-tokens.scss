@@ -1,6 +1,6 @@
-@import './colors';
-@import './radius';
-@import './shadows';
+@use './colors' as *;
+@use './radius' as *;
+@use './shadows' as *;
 
 /**
  * UI-kit Component Specific Tokens
