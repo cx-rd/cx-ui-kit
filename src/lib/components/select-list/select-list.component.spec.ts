@@ -71,51 +71,6 @@ describe('SelectListComponent', () => {
             .toBeLessThan(4);
     }));
 
-    it('renders the panel inline when inline mode is enabled', fakeAsync(() => {
-        fixture.componentRef.setInput('panelMode', 'inline');
-        fixture.detectChanges();
-
-        const trigger = fixture.nativeElement.querySelector('.select-list__trigger') as HTMLButtonElement;
-
-        trigger.click();
-        fixture.detectChanges();
-        tick(10);
-        tick(180);
-        fixture.detectChanges();
-        tick(180);
-        fixture.detectChanges();
-
-        expect(fixture.nativeElement.querySelector('.select-list__inline-panel-host')).not.toBeNull();
-        expect(overlayContainerElement.querySelector('.select-list__panel')).toBeNull();
-    }));
-
-    it('repositions correctly after switching from inline mode back to overlay mode', fakeAsync(() => {
-        fixture.componentRef.setInput('panelMode', 'inline');
-        fixture.detectChanges();
-
-        fixture.componentRef.setInput('panelMode', 'overlay');
-        fixture.detectChanges();
-
-        const trigger = fixture.nativeElement.querySelector('.select-list__trigger') as HTMLButtonElement;
-
-        trigger.click();
-        fixture.detectChanges();
-        tick(10);
-        tick(180);
-        fixture.detectChanges();
-
-        const panel = overlayContainerElement.querySelector('.select-list__panel') as HTMLElement | null;
-
-        expect(panel).withContext('expected the overlay panel after switching back from inline mode').not.toBeNull();
-
-        const triggerRect = trigger.getBoundingClientRect();
-        const panelRect = panel!.getBoundingClientRect();
-        const expectedTop = triggerRect.bottom + 8;
-
-        expect(Math.abs(panelRect.left - triggerRect.left)).toBeLessThan(4);
-        expect(Math.abs(panelRect.top - expectedTop)).toBeLessThan(4);
-    }));
-
     it('keeps the overlay panel rendered until the close animation finishes', fakeAsync(() => {
         const trigger = fixture.nativeElement.querySelector('.select-list__trigger') as HTMLButtonElement;
 
@@ -139,6 +94,25 @@ describe('SelectListComponent', () => {
         expect(overlayContainerElement.querySelector('.select-list__panel')).not.toBeNull();
 
         tick(1);
+        fixture.detectChanges();
+
+        expect(overlayContainerElement.querySelector('.select-list__panel')).toBeNull();
+    }));
+
+    it('closes the panel when clicking outside the component', fakeAsync(() => {
+        const trigger = fixture.nativeElement.querySelector('.select-list__trigger') as HTMLButtonElement;
+
+        trigger.click();
+        fixture.detectChanges();
+        tick(10);
+        tick(180);
+        fixture.detectChanges();
+
+        expect(overlayContainerElement.querySelector('.select-list__panel')).not.toBeNull();
+
+        document.body.dispatchEvent(new MouseEvent('mousedown', { bubbles: true }));
+        fixture.detectChanges();
+        tick(180);
         fixture.detectChanges();
 
         expect(overlayContainerElement.querySelector('.select-list__panel')).toBeNull();

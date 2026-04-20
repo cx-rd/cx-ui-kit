@@ -27,19 +27,6 @@
     position: relative;
 }
 
-.select-list__inline-panel-host {
-    position: absolute;
-    right: 0;
-    left: 0;
-    top: calc(100% + 8px);
-    z-index: 20;
-}
-
-.select-list__inline-panel-host--above {
-    top: auto;
-    bottom: calc(100% + 8px);
-}
-
 .select-list__panel-shell {
     width: 100%;
     opacity: 0;
@@ -56,15 +43,6 @@
     opacity: 1;
     transform: translateY(0) scale(1);
     pointer-events: auto;
-}
-
-.select-list__panel-shell--above {
-    transform: translateY(8px) scale(0.985);
-    transform-origin: bottom center;
-}
-
-.select-list__panel-shell--above.select-list__panel-shell--open {
-    transform: translateY(0) scale(1);
 }
 
 .select-list__trigger {

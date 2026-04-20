@@ -1,13 +1,11 @@
 <ng-template #panelContent>
     <div
-        #panelShellRef
         class="select-list__panel-shell"
-        [class.select-list__panel-shell--open]="isPanelOpen"
-        [class.select-list__panel-shell--above]="isInlinePanelMode && resolvedInlinePanelPlacement === 'above'">
+        [class.select-list__panel-shell--open]="isPanelOpen">
         <section
+            #panelElement
             class="select-list__panel"
             [id]="panelId"
-            [style.max-height.px]="isInlinePanelMode ? inlinePanelMaxHeight : null"
             (keydown.escape)="closePanel()">
             @if (canShowSearch || (isMulti && showSelectAll())) {
                 <div class="select-list__toolbar">
@@ -181,29 +179,19 @@
 
         <span class="select-list__chevron" aria-hidden="true"></span>
 
-        @if (isInlinePanelMode && isPanelRendered) {
-            <div
-                class="select-list__inline-panel-host"
-                [class.select-list__inline-panel-host--above]="resolvedInlinePanelPlacement === 'above'">
-                <ng-container [ngTemplateOutlet]="panelContent"></ng-container>
-            </div>
-        }
-
-        @if (!isInlinePanelMode) {
-            <ng-template
-                cdkConnectedOverlay
-                [cdkConnectedOverlayOrigin]="overlayOrigin"
-                [cdkConnectedOverlayOpen]="isPanelRendered"
-                [cdkConnectedOverlayPanelClass]="'tp-ui-overlay-pane'"
-                [cdkConnectedOverlayHasBackdrop]="isPanelOpen"
-                [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
-                [cdkConnectedOverlayPositions]="overlayPositions"
-                [cdkConnectedOverlayWidth]="overlayWidth"
-                (backdropClick)="closePanel()"
-                (detach)="onOverlayDetach()">
-                <ng-container [ngTemplateOutlet]="panelContent"></ng-container>
-            </ng-template>
-        }
+        <ng-template
+            cdkConnectedOverlay
+            [cdkConnectedOverlayOrigin]="overlayOrigin"
+            [cdkConnectedOverlayOpen]="isPanelRendered"
+            [cdkConnectedOverlayPanelClass]="'tp-ui-overlay-pane'"
+            [cdkConnectedOverlayHasBackdrop]="isPanelOpen"
+            [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
+            [cdkConnectedOverlayPositions]="overlayPositions"
+            [cdkConnectedOverlayWidth]="overlayWidth"
+            (backdropClick)="closePanel()"
+            (detach)="onOverlayDetach()">
+            <ng-container [ngTemplateOutlet]="panelContent"></ng-container>
+        </ng-template>
     </div>
 
     @if (hint(); as hintText) {

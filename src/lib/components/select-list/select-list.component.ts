@@ -69,8 +69,7 @@ export class SelectListComponent<T = unknown> implements ControlValueAccessor, O
 
     private static nextId = 0;
 
-    // 面板需要分別量測內容高度、對齊觸發器，並在開啟後把焦點移到搜尋框。
-    private readonly panelShellRef = viewChild<unknown, ElementRef<HTMLDivElement>>('panelShellRef', { read: ElementRef });
+    private readonly panelElement = viewChild<unknown, ElementRef<HTMLElement>>('panelElement', { read: ElementRef });
     private readonly triggerButton = viewChild<unknown, ElementRef<HTMLButtonElement>>('triggerButton', { read: ElementRef });
     private readonly searchInput = viewChild<unknown, ElementRef<HTMLInputElement>>('searchInput', { read: ElementRef });
 
@@ -82,8 +81,6 @@ export class SelectListComponent<T = unknown> implements ControlValueAccessor, O
     readonly loadingLabel = input('Loading options...');
     readonly minSearchLabel = input<string>();
     readonly selectionMode = input<SelectListSelectionMode>('single');
-    readonly panelMode = input<'overlay' | 'inline'>('overlay');
-    readonly inlinePanelPlacement = input<'below' | 'above' | 'auto'>('below');
     readonly options = input<SelectListOption<T>[]>([]);
     readonly dataSource = input<SelectListDataSource<T> | undefined>();
     readonly searchable = input<boolean | undefined, boolean | string | null | undefined>(undefined, {
@@ -117,8 +114,6 @@ export class SelectListComponent<T = unknown> implements ControlValueAccessor, O
 
     isPanelOpen = false;
     isPanelRendered = false;
-    resolvedInlinePanelPlacement: 'below' | 'above' = 'below';
-    inlinePanelMaxHeight: number | null = null;
     overlayWidth = 0;
     asyncOptions: SelectListOption<T>[] = [];
     knownOptions: SelectListOption<T>[] = [];
@@ -139,7 +134,6 @@ export class SelectListComponent<T = unknown> implements ControlValueAccessor, O
     private onTouched: () => void = () => undefined;
 
     constructor() {
-        // 搜尋字串改變時，同步通知外部並在 async 模式下觸發 debounce 載入。
         this.searchControl.valueChanges
             .pipe(takeUntilDestroyed(this.destroyRef))
             .subscribe((query) => {
@@ -151,14 +145,12 @@ export class SelectListComponent<T = unknown> implements ControlValueAccessor, O
                 this.cdr.markForCheck();
             });
 
-        // 單選/多選模式切換時，重新整理目前值的資料形狀，避免殘留舊模式的選取狀態。
         effect(() => {
             const selectionMode = this.selectionMode();
             this.selectedValues = this.normalizeSelection(this.lastWrittenValue, selectionMode);
             this.cdr.markForCheck();
         });
 
-        // options 或 dataSource 有變動時，同步更新可辨識選項池；若面板已開啟也刷新 async 結果。
         effect(() => {
             this.options();
             this.dataSource();
@@ -174,7 +166,6 @@ export class SelectListComponent<T = unknown> implements ControlValueAccessor, O
             this.cdr.markForCheck();
         });
 
-        // 被外部禁用時立即收起面板，避免畫面仍停留在可互動狀態。
         effect(() => {
             if (this.disabled() && this.isPanelOpen) {
                 this.closePanel();
@@ -184,7 +175,6 @@ export class SelectListComponent<T = unknown> implements ControlValueAccessor, O
             this.cdr.markForCheck();
         });
 
-        // 搜尋功能被關閉時一併清掉查詢，避免下次打開還沿用舊條件。
         effect(() => {
             this.searchable();
 
@@ -206,10 +196,6 @@ export class SelectListComponent<T = unknown> implements ControlValueAccessor, O
 
     get isMulti(): boolean {
         return this.selectionMode() === 'multi';
-    }
-
-    get isInlinePanelMode(): boolean {
-        return this.panelMode() === 'inline';
     }
 
     get isPanelClosing(): boolean {
@@ -349,22 +335,24 @@ export class SelectListComponent<T = unknown> implements ControlValueAccessor, O
 
     @HostListener('window:resize')
     onWindowResize(): void {
-        if (this.isInlinePanelMode && this.isPanelRendered) {
-            this.syncInlinePanelPlacement();
-        }
-
-        if (this.isPanelRendered && !this.isInlinePanelMode) {
+        if (this.isPanelRendered) {
             this.updateOverlayWidth();
         }
     }
 
     @HostListener('document:mousedown', ['$event'])
     onDocumentMouseDown(event: MouseEvent): void {
-        if (!this.isPanelOpen || !this.isInlinePanelMode) {
+        if (!this.isPanelRendered) {
             return;
         }
 
-        if (this.hostElement.nativeElement.contains(event.target as Node | null)) {
+        const target = event.target as Node | null;
+
+        if (this.hostElement.nativeElement.contains(target)) {
+            return;
+        }
+
+        if (this.panelElement()?.nativeElement.contains(target)) {
             return;
         }
 
@@ -394,14 +382,8 @@ export class SelectListComponent<T = unknown> implements ControlValueAccessor, O
         }
 
         this.clearPanelCloseTimer();
+        this.updateOverlayWidth();
 
-        if (this.isInlinePanelMode) {
-            this.syncInlinePanelPlacement();
-        } else {
-            this.updateOverlayWidth();
-        }
-
-        // 先把 DOM 掛上去，再延後一個 tick 切到開啟狀態，動畫才不會像 ngIf 硬切。
         if (!this.isPanelRendered) {
             this.isPanelRendered = true;
         }
@@ -409,12 +391,7 @@ export class SelectListComponent<T = unknown> implements ControlValueAccessor, O
         this.clearPanelOpenTimer();
         this.panelOpenTimer = setTimeout(() => {
             this.panelOpenTimer = undefined;
-
-            if (this.isInlinePanelMode) {
-                this.syncInlinePanelPlacement();
-            } else {
-                this.updateOverlayWidth();
-            }
+            this.updateOverlayWidth();
 
             this.isPanelOpen = true;
             this.openedChange.emit(true);
@@ -456,7 +433,6 @@ export class SelectListComponent<T = unknown> implements ControlValueAccessor, O
         this.openedChange.emit(false);
         this.onTouched();
 
-        // 等收合動畫結束後再卸載，讓 inline 與 overlay 的關閉手感一致。
         this.clearPanelCloseTimer();
         this.panelCloseTimer = setTimeout(() => {
             this.panelCloseTimer = undefined;
@@ -466,11 +442,6 @@ export class SelectListComponent<T = unknown> implements ControlValueAccessor, O
     }
 
     onOverlayDetach(): void {
-        if (this.isInlinePanelMode) {
-            this.finalizePanelClose();
-            return;
-        }
-
         if (this.isPanelRendered) {
             const wasInteracting = this.isPanelOpen || !!this.panelOpenTimer;
 
@@ -588,7 +559,6 @@ export class SelectListComponent<T = unknown> implements ControlValueAccessor, O
             : this.staticOptionPool;
     }
 
-    // 所有選取變更都集中在這裡，確保 CVA、output 與已知選項快取同步更新。
     private updateSelection(nextValues: T[], option?: SelectListOption<T>): void {
         const selectionMode = this.selectionMode();
         const normalizedValues = this.normalizeSelection(nextValues, selectionMode);
@@ -704,7 +674,6 @@ export class SelectListComponent<T = unknown> implements ControlValueAccessor, O
         return groups;
     }
 
-    // Async 模式的搜尋與翻頁都走這個入口，統一 debounce 與頁碼重置規則。
     private scheduleAsyncLoad(resetPage: boolean, immediate = false): void {
         if (!this.isAsyncMode || !this.isPanelOpen) {
             return;
@@ -722,7 +691,6 @@ export class SelectListComponent<T = unknown> implements ControlValueAccessor, O
         }, delay);
     }
 
-    // 以 requestId 保護非同步結果，避免較舊的請求晚回來覆蓋最新查詢。
     private async fetchAsyncOptions(resetPage: boolean): Promise<void> {
         const loader = this.dataSource()?.asyncLoader;
 
@@ -813,7 +781,6 @@ export class SelectListComponent<T = unknown> implements ControlValueAccessor, O
         this.knownOptions = this.mergeOptionCollections(this.knownOptions, options);
     }
 
-    // 合併多個來源時依 id 或 value 去重，讓新資料可以覆寫舊欄位內容。
     private mergeOptionCollections(...collections: SelectListOption<T>[][]): SelectListOption<T>[] {
         const merged: SelectListOption<T>[] = [];
 
@@ -856,59 +823,6 @@ export class SelectListComponent<T = unknown> implements ControlValueAccessor, O
         this.overlayWidth = width ? Math.round(width) : 0;
     }
 
-    // inline 模式自行估算上下可用空間，盡量模擬 overlay 的方向 fallback 體驗。
-    private syncInlinePanelPlacement(): void {
-        const configuredPlacement = this.inlinePanelPlacement();
-
-        if (!this.isInlinePanelMode) {
-            return;
-        }
-
-        if (configuredPlacement !== 'auto') {
-            this.resolvedInlinePanelPlacement = configuredPlacement;
-            this.inlinePanelMaxHeight = null;
-            this.cdr.markForCheck();
-            return;
-        }
-
-        const triggerRect = this.triggerButton()?.nativeElement.getBoundingClientRect()
-            ?? this.hostElement.nativeElement.getBoundingClientRect();
-        const panelHeight = this.panelShellRef()?.nativeElement.getBoundingClientRect().height
-            ?? this.panelShellRef()?.nativeElement.scrollHeight
-            ?? 280;
-        const viewportHeight = window.innerHeight || document.documentElement.clientHeight || 0;
-        const viewportPadding = 12;
-        const offset = 8;
-        const availableBelow = Math.max(0, viewportHeight - triggerRect.bottom - offset - viewportPadding);
-        const availableAbove = Math.max(0, triggerRect.top - offset - viewportPadding);
-
-        const nextPlacement = this.resolveInlinePlacement(panelHeight, availableAbove, availableBelow);
-        const selectedAvailableSpace = nextPlacement === 'above' ? availableAbove : availableBelow;
-
-        this.resolvedInlinePanelPlacement = nextPlacement;
-        this.inlinePanelMaxHeight = selectedAvailableSpace > 0
-            ? Math.max(0, Math.floor(Math.min(420, selectedAvailableSpace)))
-            : null;
-        this.cdr.markForCheck();
-    }
-
-    private resolveInlinePlacement(
-        panelHeight: number,
-        availableAbove: number,
-        availableBelow: number
-    ): 'above' | 'below' {
-        if (panelHeight <= availableBelow) {
-            return 'below';
-        }
-
-        if (panelHeight <= availableAbove) {
-            return 'above';
-        }
-
-        return availableBelow >= availableAbove ? 'below' : 'above';
-    }
-
-    // 真正卸載前才做收尾與清搜尋，避免動畫過程中內容突然消失。
     private finalizePanelClose(): void {
         this.clearPanelCloseTimer();
 
@@ -974,3 +888,4 @@ export class SelectListComponent<T = unknown> implements ControlValueAccessor, O
         this.clearPanelCloseTimer();
     }
 }
+
