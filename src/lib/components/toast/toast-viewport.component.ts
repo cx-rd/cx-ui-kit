@@ -39,6 +39,7 @@ export class ToastViewportComponent implements AfterViewInit {
     private resizeObserver?: ResizeObserver;
     private measureFrame?: number;
     private isViewReady = false;
+    // 依位置分組，讓每個角落的 toast stack 可以獨立展開與量測。
     readonly groups = computed(() => {
         const grouped = new Map<ToastPosition, ReturnType<typeof this.toastService.toasts>>();
         const position = this.position();
@@ -54,27 +55,28 @@ export class ToastViewportComponent implements AfterViewInit {
 
         return Array.from(grouped.entries());
     });
+    // toast 清單變動後，統一在下一幀重算堆疊版面，避免連續量測造成抖動。
     private readonly toastWatcher = effect(() => {
         this.groups();
         this.scheduleMeasure();
     });
 
-    /** Keeps only the latest three toasts visible in each stack. */
+    /** 每個位置只顯示最新三筆，其餘透過堆疊視覺暗示仍然存在。 */
     getStackedToasts(toasts: ReturnType<typeof this.toastService.toasts>): ReturnType<typeof this.toastService.toasts> {
         return [...toasts].reverse().slice(0, 3);
     }
 
-    /** Removes a toast from the service and viewport. */
+    /** 從 service 移除指定 toast。 */
     dismiss(id: string): void {
         this.toastService.dismiss(id);
     }
 
-    /** Returns whether the stack at the given position is currently expanded. */
+    /** 判斷指定位置的 stack 目前是否展開。 */
     isExpanded(position: ToastPosition): boolean {
         return this.expandedStacks().has(position);
     }
 
-    /** Sets the expanded state for a specific toast stack position. */
+    /** 只切換單一位置的展開狀態，避免不同角落互相干擾。 */
     setExpanded(position: ToastPosition, expanded: boolean): void {
         const isExpanded = this.expandedStacks().has(position);
 
@@ -96,7 +98,7 @@ export class ToastViewportComponent implements AfterViewInit {
         this.scheduleMeasure();
     }
 
-    /** Collapses a stack only when focus moves completely outside of it. */
+    /** 焦點真的離開整個 stack 才收合，讓鍵盤操作不會一直閃動。 */
     onStackFocusOut(position: ToastPosition, event: FocusEvent): void {
         const currentTarget = event.currentTarget as HTMLElement | null;
         const nextTarget = event.relatedTarget as Node | null;
@@ -108,7 +110,7 @@ export class ToastViewportComponent implements AfterViewInit {
         this.scheduleCollapseCheck(position);
     }
 
-    /** Expands on direct toast hover and collapses only after the pointer leaves the whole stack. */
+    /** 滑入任一 toast 就展開；離開後延後檢查，避免跨卡片移動時誤收合。 */
     onToastHover(position: ToastPosition, event: { id: string; hovering: boolean }): void {
         if (event.hovering) {
             this.cancelCollapseCheck(position);
@@ -124,12 +126,12 @@ export class ToastViewportComponent implements AfterViewInit {
         this.scheduleCollapseCheck(position);
     }
 
-    /** Re-emits action clicks in a simplified payload for consuming apps. */
+    /** 對外輸出較精簡的 action payload。 */
     onAction(event: { id: string; action: { id: string } }): void {
         this.actionClick.emit({ id: event.id, actionId: event.action.id });
     }
 
-    /** Starts observing toast sizes once the viewport has rendered. */
+    /** View 完成渲染後才開始量測，避免抓到尚未穩定的尺寸。 */
     ngAfterViewInit(): void {
         this.isViewReady = true;
 
@@ -153,7 +155,7 @@ export class ToastViewportComponent implements AfterViewInit {
         });
     }
 
-    /** Schedules a single layout recalculation on the next animation frame. */
+    /** 把多次尺寸更新合併到同一個 animation frame 處理。 */
     private scheduleMeasure(): void {
         if (!this.isViewReady) {
             return;
@@ -172,7 +174,7 @@ export class ToastViewportComponent implements AfterViewInit {
         });
     }
 
-    /** Defers collapse so moving between toasts in the same stack does not flicker the layout. */
+    /** 延後一幀再判斷是否收合，減少在同一個 stack 內移動時的閃爍。 */
     private scheduleCollapseCheck(position: ToastPosition): void {
         this.cancelCollapseCheck(position);
 
@@ -198,7 +200,7 @@ export class ToastViewportComponent implements AfterViewInit {
         });
     }
 
-    /** Cancels any pending collapse check for the given stack position. */
+    /** 取消指定 stack 既有的收合檢查。 */
     private cancelCollapseCheck(position: ToastPosition): void {
         const frame = this.collapseFrames.get(position);
 
@@ -210,7 +212,7 @@ export class ToastViewportComponent implements AfterViewInit {
         this.collapseFrames.delete(position);
     }
 
-    /** Subscribes each visible stack item to ResizeObserver updates. */
+    /** 讓每張可見卡片的尺寸變動都能回頭觸發重新排版。 */
     private observeItems(): void {
         if (!this.resizeObserver) {
             return;
@@ -227,7 +229,7 @@ export class ToastViewportComponent implements AfterViewInit {
         }
     }
 
-    /** Computes collapsed and expanded transforms for each toast stack. */
+    /** 同時計算收合與展開兩套位移，讓堆疊層次在不同尺寸下都一致。 */
     private applyStackLayout(): void {
         const isCompactViewport = window.matchMedia('(max-width: 640px)').matches;
         const collapsedStep = isCompactViewport ? 8 : 10;
@@ -277,7 +279,7 @@ export class ToastViewportComponent implements AfterViewInit {
         }
     }
 
-    /** Returns the vertical offsets that create the overlapped collapsed stack. */
+    /** 計算收合狀態下的垂直重疊位移。 */
     private getCollapsedOffsets(collapsedHeights: number[], collapsedStep: number): number[] {
         if (collapsedHeights.length === 0) {
             return [];
@@ -295,19 +297,19 @@ export class ToastViewportComponent implements AfterViewInit {
         return offsets;
     }
 
-    /** Gradually shrinks deeper toasts so the stack reads as layered cards. */
+    /** 深層卡片逐步縮小，強化堆疊的層次感。 */
     private getCollapsedScale(index: number, isCompactViewport: boolean): number {
         const scaleStep = isCompactViewport ? 0.045 : 0.055;
         return Math.max(0.84, 1 - (index * scaleStep));
     }
 
-    /** Measures the rendered toast card width so the stack hit area matches the visible card. */
+    /** 以實際卡片寬度當作 stack 命中範圍，避免 hover 區域比畫面更寬。 */
     private getItemWidth(item: HTMLElement): number {
         const toast = item.querySelector('.toast') as HTMLElement | null;
         return Math.ceil(toast?.getBoundingClientRect().width ?? item.getBoundingClientRect().width);
     }
 
-    /** Finds the rendered stack element for a specific toast position. */
+    /** 取得指定位置對應的 DOM stack。 */
     private getStackElement(position: ToastPosition): HTMLElement | null {
         return this.hostElement.nativeElement.querySelector(
             `.toast-stack[data-position="${position}"]`

@@ -2,6 +2,10 @@
 
 Standardized UI component library for Twilight Kepler projects.
 
+Additional package docs:
+- `CHANGELOG.md` for release history
+- `RELEASE.md` for the manual release workflow
+
 ## Installation
 
 ### 1. Registry Setup
@@ -16,7 +20,7 @@ Add the GitHub Packages registry and authentication token to your `.npmrc` befor
 This library requires Angular CDK in the consuming project:
 
 ```bash
-npm install @angular/cdk@19
+npm install @angular/cdk@21
 npm install @cx-rd/ui-kit
 ```
 
@@ -191,6 +195,8 @@ export class ExampleComponent {
 Useful inputs:
 - `label`, `hint`, `placeholder`, `searchPlaceholder`
 - `selectionMode`, `showSelectAll`, `visibleSelectionLimit`, `maxSelections`
+- `panelMode`, `inlinePanelPlacement` for embedded layouts that should open within the local container instead of body overlay
+  `inlinePanelPlacement` supports `below | above | auto`
 - `options` for local data
 - `dataSource` for seeded async options, debounced remote search, and paging
 - `compareWith` when values are objects instead of primitives
@@ -199,6 +205,103 @@ Useful outputs:
 - `selectionChange`
 - `searchChange`
 - `openedChange`
+
+## DataTable
+`DataTableComponent` covers the common list view baseline without forcing every screen into the same data-loading strategy:
+- Client or manual sorting
+- Client or manual pagination
+- Optional single or multiple row selection
+- Built-in page-size selector, range summary, and paginator footer
+- Loading / empty states
+- Custom header and cell templates for advanced rendering
+
+```ts
+import { Component, TemplateRef, ViewChild } from '@angular/core';
+import {
+  DataTableCellContext,
+  DataTableColumn,
+  DataTableComponent,
+  DataTablePageChange,
+  DataTableSelectionChange,
+  DataTableSortState
+} from '@cx-rd/ui-kit';
+
+interface UserRow {
+  id: number;
+  name: string;
+  email: string;
+  status: 'active' | 'invited';
+}
+
+@Component({
+  standalone: true,
+  imports: [DataTableComponent],
+  template: `
+    <ng-template #statusCell let-row let-value="value">
+      <span class="status-chip" [class.status-chip--active]="value === 'active'">
+        {{ row.status }}
+      </span>
+    </ng-template>
+
+    <lib-data-table
+      caption="Team members"
+      ariaLabel="Team members table"
+      rowId="id"
+      selectionMode="multiple"
+      [columns]="columns"
+      [items]="rows"
+      [pageSize]="10"
+      [pageSizeOptions]="[10, 20, 50]"
+      (sortChange)="onSortChange($event)"
+      (pageChange)="onPageChange($event)"
+      (selectionChange)="onSelectionChange($event)">
+    </lib-data-table>
+  `
+})
+export class ExampleComponent {
+  @ViewChild('statusCell', { static: true }) statusCell!: TemplateRef<DataTableCellContext<UserRow>>;
+
+  rows: UserRow[] = [
+    { id: 1, name: 'Aria Young', email: 'aria@acme.dev', status: 'active' },
+    { id: 2, name: 'Milo Chen', email: 'milo@acme.dev', status: 'invited' }
+  ];
+
+  get columns(): DataTableColumn<UserRow>[] {
+    return [
+      { id: 'name', header: 'Name', sortable: true, minWidth: '180px' },
+      { id: 'email', header: 'Email', sortable: true, minWidth: '220px' },
+      { id: 'status', header: 'Status', cellTemplate: this.statusCell, nowrap: true }
+    ];
+  }
+
+  onSortChange(sort: DataTableSortState | null): void {
+    console.log(sort);
+  }
+
+  onPageChange(event: DataTablePageChange): void {
+    console.log(event);
+    // Fetch the next page if you use manual pagination.
+  }
+
+  onSelectionChange(event: DataTableSelectionChange<UserRow>): void {
+    console.log(event);
+    // Handle selected row ids or row payloads.
+  }
+}
+```
+
+Useful inputs:
+- `columns`, `items`, `rowId`
+- `selectionMode`, `selectedRowIds`, `isRowSelectable`
+- `sortMode`, `sortState`
+- `paginationMode`, `pageIndex`, `pageSize`, `pageSizeOptions`, `totalItems`
+- `stickyHeader`, `dense`, `loading`, `emptyStateLabel`
+
+Useful outputs:
+- `selectedRowIdsChange`
+- `selectionChange`
+- `sortChange`
+- `pageChange`
 
 ## Known Limitations
 - Overlays such as flyouts and modals are appended to the `body` level to escape local stacking contexts.

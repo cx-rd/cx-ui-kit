@@ -1,0 +1,206 @@
+<section
+    class="data-table"
+    [class.data-table--sticky]="stickyHeader()"
+    [class.data-table--dense]="dense()"
+    [attr.aria-label]="ariaLabel()"
+    [attr.aria-busy]="loading()">
+    @if (caption(); as captionText) {
+        <div class="data-table__caption">
+            {{ captionText }}
+        </div>
+    }
+
+    <div class="data-table__surface">
+        <div class="data-table__scroll">
+            <table class="data-table__table">
+                <thead class="data-table__head">
+                    <tr class="data-table__head-row">
+                        @if (selectionMode() !== 'none') {
+                            <th scope="col" class="data-table__selection-cell data-table__selection-cell--head">
+                                @if (selectionMode() === 'multiple') {
+                                    <label
+                                        class="data-table__checkbox-wrap"
+                                        aria-label="Select all visible rows">
+                                        <input
+                                            type="checkbox"
+                                            [checked]="allVisibleRowsSelected"
+                                            [indeterminate]="visibleSelectionIndeterminate"
+                                            (change)="toggleSelectAllVisibleRows()" />
+                                        <span class="data-table__checkbox">
+                                            <span></span>
+                                        </span>
+                                    </label>
+                                }
+                            </th>
+                        }
+
+                        @for (column of columns(); track trackColumn($index, column)) {
+                            <th
+                                scope="col"
+                                class="data-table__column"
+                                [class.data-table__column--align-center]="column.align === 'center'"
+                                [class.data-table__column--align-end]="column.align === 'end'"
+                                [class.data-table__column--sortable]="column.sortable"
+                                [class.data-table__column--sorted]="isColumnSorted(column)"
+                                [class]="column.headerClass ?? ''"
+                                [attr.aria-sort]="
+                                    isColumnSorted(column, 'asc')
+                                        ? 'ascending'
+                                        : (isColumnSorted(column, 'desc') ? 'descending' : (column.sortable ? 'none' : null))
+                                "
+                                [style.width]="column.width ?? null"
+                                [style.min-width]="column.minWidth ?? column.width ?? null">
+                                @if (column.sortable) {
+                                    <button
+                                        type="button"
+                                        class="data-table__sort-button"
+                                        [class.data-table__sort-button--active]="isColumnSorted(column)"
+                                        (click)="toggleSort(column)">
+                                        <span class="data-table__sort-copy">
+                                            @if (column.headerTemplate) {
+                                                <ng-container
+                                                    [ngTemplateOutlet]="column.headerTemplate"
+                                                    [ngTemplateOutletContext]="{
+                                                        $implicit: column,
+                                                        column: column,
+                                                        sort: getColumnHeaderSort(column)
+                                                    }">
+                                                </ng-container>
+                                            } @else {
+                                                <span>{{ column.header }}</span>
+                                            }
+                                        </span>
+
+                                        <span
+                                            class="data-table__sort-indicator"
+                                            [class.data-table__sort-indicator--asc]="isColumnSorted(column, 'asc')"
+                                            [class.data-table__sort-indicator--desc]="isColumnSorted(column, 'desc')"
+                                            aria-hidden="true">
+                                            <span></span>
+                                            <span></span>
+                                        </span>
+                                    </button>
+                                } @else if (column.headerTemplate) {
+                                    <ng-container
+                                        [ngTemplateOutlet]="column.headerTemplate"
+                                        [ngTemplateOutletContext]="{
+                                            $implicit: column,
+                                            column: column,
+                                            sort: getColumnHeaderSort(column)
+                                        }">
+                                    </ng-container>
+                                } @else {
+                                    <span>{{ column.header }}</span>
+                                }
+                            </th>
+                        }
+                    </tr>
+                </thead>
+
+                <tbody class="data-table__body">
+                    @if (loading()) {
+                        <tr>
+                            <td class="data-table__status" [attr.colspan]="displayedColumnCount">
+                                {{ loadingLabel() }}
+                            </td>
+                        </tr>
+                    } @else if (!visibleRows.length) {
+                        <tr>
+                            <td class="data-table__status" [attr.colspan]="displayedColumnCount">
+                                {{ emptyStateLabel() }}
+                            </td>
+                        </tr>
+                    } @else {
+                        @for (row of visibleRows; track trackRow(row, visibleRowOffset + $index); let rowIndex = $index) {
+                            <tr class="data-table__row">
+                                @if (selectionMode() !== 'none') {
+                                    <td class="data-table__selection-cell">
+                                        @if (canSelectRow(row, visibleRowOffset + rowIndex)) {
+                                            <label
+                                                class="data-table__checkbox-wrap"
+                                                [attr.aria-label]="'Select row ' + (visibleRowOffset + rowIndex + 1)">
+                                                <input
+                                                    type="checkbox"
+                                                    [checked]="isRowSelected(row, visibleRowOffset + rowIndex)"
+                                                    (change)="toggleRowSelection(row, visibleRowOffset + rowIndex)" />
+                                                <span class="data-table__checkbox">
+                                                    <span></span>
+                                                </span>
+                                            </label>
+                                        }
+                                    </td>
+                                }
+
+                                @for (column of columns(); track trackColumn($index, column)) {
+                                    <td
+                                        class="data-table__cell"
+                                        [class.data-table__cell--align-center]="column.align === 'center'"
+                                        [class.data-table__cell--align-end]="column.align === 'end'"
+                                        [class.data-table__cell--nowrap]="column.nowrap"
+                                        [class]="resolveCellClass(column, row, visibleRowOffset + rowIndex) ?? ''"
+                                        [style.width]="column.width ?? null"
+                                        [style.min-width]="column.minWidth ?? column.width ?? null">
+                                        @if (column.cellTemplate) {
+                                            <ng-container
+                                                [ngTemplateOutlet]="column.cellTemplate"
+                                                [ngTemplateOutletContext]="buildCellContext(
+                                                    row,
+                                                    column,
+                                                    visibleRowOffset + rowIndex
+                                                )">
+                                            </ng-container>
+                                        } @else {
+                                            <span class="data-table__cell-content">
+                                                {{ formatCellValue(row, column, visibleRowOffset + rowIndex) }}
+                                            </span>
+                                        }
+                                    </td>
+                                }
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <footer class="data-table__footer">
+            <div class="data-table__footer-meta">
+                @if (showPageSizeSelector()) {
+                    <div class="data-table__page-size">
+                        <span>{{ pageSizeLabel() }}</span>
+                        <div class="data-table__page-size-control">
+                            <lib-select-list
+                                placeholder="Page size"
+                                panelMode="inline"
+                                inlinePanelPlacement="auto"
+                                [options]="pageSizeSelectOptions"
+                                [searchable]="false"
+                                [clearable]="false"
+                                [closeOnSelect]="true"
+                                [formControl]="pageSizeControl"
+                                (selectionChange)="onPageSizeSelectionChange($event)">
+                            </lib-select-list>
+                        </div>
+                    </div>
+                }
+
+                @if (showRangeSummary()) {
+                    <p class="data-table__summary">{{ rangeSummary }}</p>
+                }
+
+                @if (selectedCountSummary; as summary) {
+                    <p class="data-table__summary data-table__summary--accent">{{ summary }}</p>
+                }
+            </div>
+
+            <lib-paginator
+                [pageIndex]="resolvedPageIndex"
+                [pageSize]="resolvedPageSize"
+                [totalItems]="totalCount"
+                [maxVisiblePages]="paginatorMaxVisiblePages()"
+                [showBoundaryButtons]="paginatorBoundaryButtons()"
+                (pageChange)="onPaginatorChange($event)">
+            </lib-paginator>
+        </footer>
+    </div>
+</section>

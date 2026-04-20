@@ -1,3 +1,115 @@
+<ng-template #panelContent>
+    <div
+        #panelShellRef
+        class="select-list__panel-shell"
+        [class.select-list__panel-shell--open]="isPanelOpen"
+        [class.select-list__panel-shell--above]="isInlinePanelMode && resolvedInlinePanelPlacement === 'above'">
+        <section
+            class="select-list__panel"
+            [id]="panelId"
+            [style.max-height.px]="isInlinePanelMode ? inlinePanelMaxHeight : null"
+            (keydown.escape)="closePanel()">
+            @if (canShowSearch || (isMulti && showSelectAll())) {
+                <div class="select-list__toolbar">
+                    @if (isMulti && showSelectAll() && selectableVisibleOptions.length) {
+                        <label
+                            class="select-list__bulk-toggle"
+                            aria-label="Toggle visible options">
+                            <input
+                                type="checkbox"
+                                [checked]="allVisibleOptionsSelected"
+                                (change)="toggleSelectAll()" />
+                            <span class="select-list__checkbox select-list__checkbox--toolbar">
+                                <span></span>
+                            </span>
+                        </label>
+                    }
+
+                    @if (canShowSearch) {
+                        <label class="select-list__search">
+                            <span class="select-list__search-icon" aria-hidden="true"></span>
+                            <input
+                                #searchInput
+                                type="text"
+                                [formControl]="searchControl"
+                                [placeholder]="searchPlaceholder()"
+                                [attr.aria-label]="searchPlaceholder()" />
+                        </label>
+                    }
+                </div>
+            }
+
+            @if (loading) {
+                <div class="select-list__status">{{ loadingLabel() }}</div>
+            }
+
+            @if (!loading && errorMessage) {
+                <div class="select-list__status select-list__status--error">
+                    {{ errorMessage }}
+                </div>
+            }
+
+            @if (shouldShowMinQueryHint) {
+                <div class="select-list__status">
+                    {{ resolvedMinQueryLabel }}
+                </div>
+            }
+
+            @if (!errorMessage && !shouldShowMinQueryHint) {
+                <div
+                    class="select-list__list"
+                    role="listbox"
+                    [attr.aria-multiselectable]="isMulti">
+                    @if (optionGroups.length) {
+                        @for (group of optionGroups; track group.label ?? $index) {
+                            <div class="select-list__group">
+                                @if (group.label) {
+                                    <p class="select-list__group-label">{{ group.label }}</p>
+                                }
+
+                                @for (option of group.options; track option.id ?? option.value ?? option.label) {
+                                    <button
+                                        type="button"
+                                        role="option"
+                                        class="select-list__option"
+                                        [class.select-list__option--selected]="isSelected(option)"
+                                        [class.select-list__option--locked]="isOptionLocked(option)"
+                                        [disabled]="option.disabled || isOptionLocked(option)"
+                                        [attr.aria-selected]="isSelected(option)"
+                                        (click)="selectOption(option)">
+                                        @if (isMulti) {
+                                            <span
+                                                class="select-list__checkbox"
+                                                [class.select-list__checkbox--checked]="isSelected(option)">
+                                                <span></span>
+                                            </span>
+                                        }
+
+                                        <span class="select-list__option-copy">
+                                            <span class="select-list__option-label">{{ option.label }}</span>
+                                            @if (option.caption) {
+                                                <span class="select-list__option-caption">{{ option.caption }}</span>
+                                            }
+                                        </span>
+                                    </button>
+                                }
+                            </div>
+                        }
+                    } @else if (!loading) {
+                        <div class="select-list__status">{{ emptyLabel() }}</div>
+                    }
+                </div>
+            }
+
+            @if (canLoadMore) {
+                <button type="button" class="select-list__load-more" (click)="loadMore()">
+                    Load more
+                </button>
+            }
+        </section>
+    </div>
+</ng-template>
+
 <div
     class="select-list"
     [class.select-list--open]="isPanelOpen"
@@ -46,10 +158,10 @@
                 }
 
                 @if (hasSelection && !isMulti && selectedOption) {
-                    <span class="select-list__single-label">{{ selectedOption?.label }}</span>
-                    @if (selectedOption?.caption) {
+                    <span class="select-list__single-label">{{ selectedOption.label }}</span>
+                    @if (selectedOption.caption) {
                         <span class="select-list__single-caption">
-                            {{ selectedOption?.caption }}
+                            {{ selectedOption.caption }}
                         </span>
                     }
                 }
@@ -68,128 +180,33 @@
         }
 
         <span class="select-list__chevron" aria-hidden="true"></span>
+
+        @if (isInlinePanelMode && isPanelRendered) {
+            <div
+                class="select-list__inline-panel-host"
+                [class.select-list__inline-panel-host--above]="resolvedInlinePanelPlacement === 'above'">
+                <ng-container [ngTemplateOutlet]="panelContent"></ng-container>
+            </div>
+        }
+
+        @if (!isInlinePanelMode) {
+            <ng-template
+                cdkConnectedOverlay
+                [cdkConnectedOverlayOrigin]="overlayOrigin"
+                [cdkConnectedOverlayOpen]="isPanelRendered"
+                [cdkConnectedOverlayPanelClass]="'tp-ui-overlay-pane'"
+                [cdkConnectedOverlayHasBackdrop]="isPanelOpen"
+                [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
+                [cdkConnectedOverlayPositions]="overlayPositions"
+                [cdkConnectedOverlayWidth]="overlayWidth"
+                (backdropClick)="closePanel()"
+                (detach)="onOverlayDetach()">
+                <ng-container [ngTemplateOutlet]="panelContent"></ng-container>
+            </ng-template>
+        }
     </div>
 
     @if (hint(); as hintText) {
         <p class="select-list__hint">{{ hintText }}</p>
     }
 </div>
-
-<ng-template
-    cdkConnectedOverlay
-    [cdkConnectedOverlayOrigin]="overlayOrigin"
-    [cdkConnectedOverlayOpen]="isPanelOpen"
-    [cdkConnectedOverlayHasBackdrop]="true"
-    [cdkConnectedOverlayBackdropClass]="'cdk-overlay-transparent-backdrop'"
-    [cdkConnectedOverlayPositions]="overlayPositions"
-    [cdkConnectedOverlayWidth]="overlayWidth"
-    (backdropClick)="closePanel()"
-    (detach)="onOverlayDetach()">
-
-    <section
-        class="select-list__panel"
-        [id]="panelId"
-        (keydown.escape)="closePanel()">
-        @if (canShowSearch || (isMulti && showSelectAll())) {
-            <div class="select-list__toolbar">
-                @if (isMulti && showSelectAll() && selectableVisibleOptions.length) {
-                    <label
-                        class="select-list__bulk-toggle"
-                        aria-label="Toggle visible options">
-                        <input
-                            type="checkbox"
-                            [checked]="allVisibleOptionsSelected"
-                            (change)="toggleSelectAll()" />
-                        <span class="select-list__checkbox select-list__checkbox--toolbar">
-                            <span></span>
-                        </span>
-                    </label>
-                }
-
-                @if (canShowSearch) {
-                    <label class="select-list__search">
-                        <span class="select-list__search-icon" aria-hidden="true"></span>
-                        <input
-                            #searchInput
-                            type="text"
-                            [formControl]="searchControl"
-                            [placeholder]="searchPlaceholder()"
-                            [attr.aria-label]="searchPlaceholder()" />
-                    </label>
-                }
-            </div>
-        }
-
-        @if (loading) {
-            <div class="select-list__status">{{ loadingLabel() }}</div>
-        }
-
-        @if (!loading && errorMessage) {
-            <div class="select-list__status select-list__status--error">
-                {{ errorMessage }}
-            </div>
-        }
-
-        @if (shouldShowMinQueryHint) {
-            <div class="select-list__status">
-                {{ resolvedMinQueryLabel }}
-            </div>
-        }
-
-        @if (!errorMessage && !shouldShowMinQueryHint) {
-            <div
-                class="select-list__list"
-                role="listbox"
-                [attr.aria-multiselectable]="isMulti">
-                @if (optionGroups.length) {
-                    @for (group of optionGroups; track group.label ?? $index) {
-                        <div class="select-list__group">
-                            @if (group.label) {
-                                <p class="select-list__group-label">{{ group.label }}</p>
-                            }
-
-                            @for (option of group.options; track option.id ?? option.value ?? option.label) {
-                                <button
-                                    type="button"
-                                    role="option"
-                                    class="select-list__option"
-                                    [class.select-list__option--selected]="isSelected(option)"
-                                    [class.select-list__option--locked]="isOptionLocked(option)"
-                                    [disabled]="option.disabled || isOptionLocked(option)"
-                                    [attr.aria-selected]="isSelected(option)"
-                                    (click)="selectOption(option)">
-                                    @if (isMulti) {
-                                        <span
-                                            class="select-list__checkbox"
-                                            [class.select-list__checkbox--checked]="isSelected(option)">
-                                            <span></span>
-                                        </span>
-                                    }
-
-                                    <span class="select-list__option-copy">
-                                        <span class="select-list__option-label">{{ option.label }}</span>
-                                        @if (option.caption) {
-                                            <span class="select-list__option-caption">{{ option.caption }}</span>
-                                        }
-                                    </span>
-
-                                    @if (!isMulti && isSelected(option)) {
-                                        <span class="select-list__option-state">Selected</span>
-                                    }
-                                </button>
-                            }
-                        </div>
-                    }
-                } @else if (!loading) {
-                    <div class="select-list__status">{{ emptyLabel() }}</div>
-                }
-            </div>
-        }
-
-        @if (canLoadMore) {
-            <button type="button" class="select-list__load-more" (click)="loadMore()">
-                Load more
-            </button>
-        }
-    </section>
-</ng-template>

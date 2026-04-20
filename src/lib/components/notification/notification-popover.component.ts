@@ -14,8 +14,10 @@ export class NotificationPopoverComponent {
 
     readonly markAllAsRead = output<void>();
     readonly viewDetail = output<NotificationItem>();
+    // Hover 時連同 DOM element 一起送出，外層才能把預覽卡對齊到目前項目。
     readonly hoverItem = output<{ notification: NotificationItem | null; element: HTMLElement | null }>();
 
+    // 互動結果全部交給容器處理，Popover 自己不直接改資料狀態。
     onMarkAllAsRead(): void {
         this.markAllAsRead.emit();
     }

@@ -3,11 +3,16 @@
 
 /**
  * Isolated Overlay Panel Classes for UI-kit
- * 
+ *
  * Rules:
  * 1. Used with cdkConnectedOverlayPanelClass.
  * 2. Isolates UI-kit styles from global CDK/Material overlays.
+ * 3. Do not override CDK overlay layout primitives here. CDK already ships those.
  */
+
+.cdk-overlay-container {
+    z-index: $z-index-overlay;
+}
 
 .tp-ui-overlay-pane {
     z-index: $z-index-overlay;

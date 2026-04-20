@@ -33,6 +33,7 @@ export class ToastComponent {
     readonly actionClick = output<{ id: string; action: ToastAction }>();
     readonly hoverChange = output<{ id: string; hovering: boolean }>();
 
+    // 將主題 token 攤平成 CSS 變數，樣式客製時只要改資料不用切換額外 class。
     readonly hostStyles = computed<Record<string, string>>(() => {
         const toast = this.toast();
         const theme = this.resolveTheme(toast.variant ?? 'info', toast.styles);
@@ -55,6 +56,7 @@ export class ToastComponent {
         };
     });
 
+    // 未額外指定 icon 時，依變體使用預設圖示。
     readonly iconSvg = computed(() => {
         const toast = this.toast();
         return toast.icon ?? DEFAULT_ICON_MAP[toast.variant ?? 'info'];
@@ -74,6 +76,7 @@ export class ToastComponent {
         this.hoverChange.emit({ id: this.toast().id, hovering });
     }
 
+    // 以變體預設為底，再疊上單筆 toast 的樣式覆寫。
     private resolveTheme(variant: ToastVariant, overrides?: ToastStyleOverrides): ToastTheme {
         return { ...DEFAULT_THEME_MAP[variant], ...overrides };
     }

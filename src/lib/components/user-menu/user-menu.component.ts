@@ -14,6 +14,7 @@ export class UserMenuComponent {
 
     readonly actionClick = output<string>();
 
+    // 元件本身不管理選單行為，點擊後只把 actionId 往外拋給容器處理。
     onActionClick(actionId: string): void {
         this.actionClick.emit(actionId);
     }

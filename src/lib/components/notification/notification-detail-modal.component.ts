@@ -13,6 +13,7 @@ export class NotificationDetailModalComponent {
     readonly notification = input<NotificationItem | null>(null);
     readonly close = output<void>();
 
+    // 關閉只往外通知，讓容器統一處理 modal 開關與後續狀態更新。
     onClose(): void {
         this.close.emit();
     }
