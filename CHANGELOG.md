@@ -12,16 +12,6 @@ This changelog follows a simple release-oriented format:
 ### Added
 - None yet.
 
-### Changed
-- None yet.
-
-### Fixed
-- None yet.
-
-### Breaking
-
-## [21.1.1]
-
 ### Breaking
 - Removed `SelectListComponent` inline panel mode support, including the `panelMode="inline"` path and related inline-only placement behavior.
 
