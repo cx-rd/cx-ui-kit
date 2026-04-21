@@ -1,5 +1,9 @@
 @use '../../core/styles/tokens' as *;
 
+$data-table-sort-icon-default: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"%3E%3Cpath d="M7%2020V5"/%3E%3Cpath d="M3%209l4-4%204%204"/%3E%3Cpath d="M17%204v15"/%3E%3Cpath d="M13%2015l4%204%204-4"/%3E%3C/svg%3E');
+$data-table-sort-icon-asc: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"%3E%3Cpath d="M3%206h10"/%3E%3Cpath d="M3%2012h10"/%3E%3Cpath d="M3%2018h10"/%3E%3Cpath d="M18%2020V5"/%3E%3Cpath d="M14%209l4-4%204%204"/%3E%3C/svg%3E');
+$data-table-sort-icon-desc: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"%3E%3Cpath d="M3%206h10"/%3E%3Cpath d="M3%2012h10"/%3E%3Cpath d="M3%2018h10"/%3E%3Cpath d="M18%204v15"/%3E%3Cpath d="M14%2015l4%204%204-4"/%3E%3C/svg%3E');
+
 :host {
     display: block;
     width: 100%;
@@ -126,38 +130,37 @@
 }
 
 .data-table__sort-indicator {
-    position: relative;
-    display: inline-flex;
-    flex-direction: column;
-    justify-content: center;
-    width: 10px;
-    height: 14px;
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    flex-shrink: 0;
+    opacity: 0.42;
+    background-color: currentColor;
+    transition:
+        opacity 140ms ease,
+        transform 140ms ease;
+    -webkit-mask: $data-table-sort-icon-default center / 18px 18px no-repeat;
+    mask: $data-table-sort-icon-default center / 18px 18px no-repeat;
 }
 
-.data-table__sort-indicator span {
-    position: absolute;
-    left: 0;
-    width: 0;
-    height: 0;
-    border-right: 5px solid transparent;
-    border-left: 5px solid transparent;
-    opacity: 0.28;
-    transition: opacity 140ms ease;
+.data-table__sort-button:hover .data-table__sort-indicator,
+.data-table__sort-button:focus-visible .data-table__sort-indicator {
+    opacity: 0.72;
 }
 
-.data-table__sort-indicator span:first-child {
-    top: 0;
-    border-bottom: 6px solid currentColor;
-}
-
-.data-table__sort-indicator span:last-child {
-    bottom: 0;
-    border-top: 6px solid currentColor;
-}
-
-.data-table__sort-indicator--asc span:first-child,
-.data-table__sort-indicator--desc span:last-child {
+.data-table__sort-indicator--asc,
+.data-table__sort-indicator--desc {
     opacity: 1;
+}
+
+.data-table__sort-indicator--asc {
+    -webkit-mask-image: $data-table-sort-icon-asc;
+    mask-image: $data-table-sort-icon-asc;
+}
+
+.data-table__sort-indicator--desc {
+    -webkit-mask-image: $data-table-sort-icon-desc;
+    mask-image: $data-table-sort-icon-desc;
 }
 
 .data-table__row {
@@ -289,6 +292,7 @@
     justify-content: space-between;
     padding: 14px 16px;
     background: rgba(248, 250, 252, 0.92);
+    border-radius: inherit;
 }
 
 .data-table__footer-meta {

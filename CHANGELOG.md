@@ -18,6 +18,20 @@ This changelog follows a simple release-oriented format:
 ### Fixed
 - None yet.
 
+### Breaking
+
+## [21.1.1]
+
+### Breaking
+- Removed `SelectListComponent` inline panel mode support, including the `panelMode="inline"` path and related inline-only placement behavior.
+
+### Changed
+- Refined `DataTableComponent` sort indicators with clearer SVG-based ascending and descending icons.
+
+### Fixed
+- Fixed `DataTableComponent` footer corner rounding so the footer inherits the table surface radius consistently.
+- Updated `SelectListComponent` so the open panel closes when the user clicks outside the panel area.
+
 ## [21.1.0] - 2026-04-20
 
 ### Added
