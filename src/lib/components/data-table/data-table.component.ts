@@ -249,14 +249,6 @@ export class DataTableComponent<T = unknown> {
             && this.visibleSelectableRows.every(({ rowKey }) => this.currentSelectedRowIds.includes(rowKey));
     }
 
-    get visibleSelectionIndeterminate(): boolean {
-        if (this.selectionMode() === 'none' || this.allVisibleRowsSelected) {
-            return false;
-        }
-
-        return this.visibleSelectableRows.some(({ rowKey }) => this.currentSelectedRowIds.includes(rowKey));
-    }
-
     trackColumn(_index: number, column: DataTableColumn<T>): string {
         return column.id;
     }
@@ -445,8 +437,7 @@ export class DataTableComponent<T = unknown> {
             mode: selectionMode,
             keys: [...nextKeys],
             rows: this.resolveSelectedRows(nextKeys),
-            allVisibleSelected: this.allVisibleRowsSelected,
-            indeterminate: this.visibleSelectionIndeterminate
+            allVisibleSelected: this.allVisibleRowsSelected
         });
         this.cdr.markForCheck();
     }

@@ -13,9 +13,11 @@ This changelog follows a simple release-oriented format:
 - None yet.
 
 ### Breaking
+- Removed the `indeterminate` field from `DataTableSelectionChange` payloads.
 - Removed `SelectListComponent` inline panel mode support, including the `panelMode="inline"` path and related inline-only placement behavior.
 
 ### Changed
+- Simplified `DataTableComponent` bulk-selection behavior by removing the indeterminate header checkbox state.
 - Refined `DataTableComponent` sort indicators with clearer SVG-based ascending and descending icons.
 
 ### Fixed

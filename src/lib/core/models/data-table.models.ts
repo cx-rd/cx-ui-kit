@@ -78,5 +78,4 @@ export interface DataTableSelectionChange<T = unknown> {
     keys: DataTableRowId[];
     rows: T[];
     allVisibleSelected: boolean;
-    indeterminate: boolean;
 }
