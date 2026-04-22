@@ -10,7 +10,8 @@ This changelog follows a simple release-oriented format:
 ## [Unreleased]
 
 ### Added
-- None yet.
+- Added the standalone `DialogComponent` and exported it from the public components entrypoint.
+- Added centered modal dialog behavior with configurable title and close controls, backdrop and Escape dismissal options, and open/close transition handling.
 
 ### Breaking
 - Removed the `indeterminate` field from `DataTableSelectionChange` payloads.
@@ -19,6 +20,8 @@ This changelog follows a simple release-oriented format:
 ### Changed
 - Simplified `DataTableComponent` bulk-selection behavior by removing the indeterminate header checkbox state.
 - Refined `DataTableComponent` sort indicators with clearer SVG-based ascending and descending icons.
+- Refined the default `ToastComponent` visual theme with lighter translucent surfaces, updated borders, and softer glass treatment.
+- Updated collapsed toast stack styling so depth effects are applied more cleanly to the rendered toast cards.
 
 ### Fixed
 - Fixed `DataTableComponent` footer corner rounding so the footer inherits the table surface radius consistently.

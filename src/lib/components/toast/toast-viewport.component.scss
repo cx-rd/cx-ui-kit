@@ -27,21 +27,15 @@
     z-index: var(--stack-z);
     overflow: visible;
     border-radius: 12px;
-    contain: paint;
-    isolation: isolate;
     transform:
         translate3d(0, var(--stack-collapsed-translate, 0px), 0)
         scale(var(--stack-collapsed-scale, 1));
     transform-origin: top center;
     opacity: var(--stack-collapsed-opacity, 1);
-    filter:
-        saturate(calc(1 - (var(--stack-index) * 0.1)))
-        blur(var(--stack-collapsed-blur, 0px));
-    will-change: transform, opacity, filter;
+    will-change: transform, opacity;
     transition:
         transform 360ms cubic-bezier(0.22, 1, 0.36, 1),
-        opacity 280ms ease,
-        filter 280ms ease;
+        opacity 280ms ease;
 }
 
 .toast-stack__item::before {
@@ -59,11 +53,12 @@
     position: relative;
     z-index: 1;
     display: block;
-    isolation: isolate;
     opacity: 0;
     transform: translate3d(var(--toast-enter-x), var(--toast-enter-y), 0);
     animation: toast-enter 360ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
-    will-change: transform, opacity;
+    filter: blur(calc(var(--stack-index, 0) * 1.3px)) saturate(calc(1 - (var(--stack-index, 0) * 0.08)));
+    will-change: transform, opacity, filter;
+    transition: filter 280ms ease;
 }
 
 .toast-stack--expanded .toast-stack__item {
@@ -71,11 +66,14 @@
         translate3d(0, var(--stack-expanded-translate, 0px), 0)
         scale(1);
     opacity: 1;
-    filter: saturate(1);
 }
 
 .toast-stack--expanded .toast-stack__item::before {
     opacity: 1;
+}
+
+.toast-stack--expanded .toast-stack__item > lib-toast {
+    filter: none;
 }
 
 .toast-stack--expanded .toast-stack__item {

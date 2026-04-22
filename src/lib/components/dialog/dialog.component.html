@@ -1,0 +1,43 @@
+@if (isRendered) {
+    <div
+        class="dialog"
+        [class.dialog--open]="isOpen">
+        <div
+            class="dialog__backdrop"
+            aria-hidden="true"
+            (click)="onBackdropClick()"></div>
+
+        <section
+            #surfaceElement
+            class="dialog__surface"
+            [id]="dialogId"
+            role="dialog"
+            tabindex="-1"
+            aria-modal="true"
+            [attr.aria-labelledby]="showTitle() ? titleId : null"
+            [attr.aria-label]="showTitle() ? null : ariaLabel()">
+            @if (hasHeader()) {
+                <header class="dialog__header">
+                    @if (showTitle()) {
+                        <h2 class="dialog__title" [id]="titleId">{{ title() }}</h2>
+                    }
+
+                    @if (showClose()) {
+                        <button
+                            type="button"
+                            class="dialog__close"
+                            [attr.aria-label]="closeAriaLabel()"
+                            (click)="requestClose()">
+                            <span></span>
+                            <span></span>
+                        </button>
+                    }
+                </header>
+            }
+
+            <div class="dialog__content">
+                <ng-content></ng-content>
+            </div>
+        </section>
+    </div>
+}

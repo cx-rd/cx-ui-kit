@@ -266,7 +266,6 @@ export class ToastViewportComponent implements AfterViewInit {
                 item.style.setProperty('--stack-expanded-translate', `${expandedOffset * direction}px`);
                 item.style.setProperty('--stack-collapsed-scale', `${collapsedScale}`);
                 item.style.setProperty('--stack-collapsed-opacity', `${Math.max(0.42, 1 - (index * 0.24))}`);
-                item.style.setProperty('--stack-collapsed-blur', `${Math.min(2.2, index * 0.85)}px`);
                 expandedHeight = Math.max(expandedHeight, expandedOffset + itemHeight);
                 expandedOffset += itemHeight + expandedGap;
             }
