@@ -1,0 +1,30 @@
+<button
+    class="button"
+    [class.button--primary]="resolvedVariant() === 'primary'"
+    [class.button--secondary]="resolvedVariant() === 'secondary'"
+    [class.button--outline]="resolvedVariant() === 'outline'"
+    [class.button--ghost]="resolvedVariant() === 'ghost'"
+    [class.button--danger]="resolvedVariant() === 'danger'"
+    [class.button--sm]="resolvedSize() === 'sm'"
+    [class.button--md]="resolvedSize() === 'md'"
+    [class.button--lg]="resolvedSize() === 'lg'"
+    [class.button--full-width]="fullWidth()"
+    [class.button--hovered]="isHovered()"
+    [class.button--active]="isActive()"
+    [type]="resolvedType()"
+    [disabled]="disabled()"
+    [attr.aria-label]="ariaLabel()"
+    [attr.aria-pressed]="pressed() === null ? null : pressed()"
+    (mouseenter)="onHoverChange(true, $event)"
+    (mouseleave)="onHoverChange(false, $event)"
+    (pointerdown)="onActiveChange(true, $event)"
+    (pointerup)="onActiveChange(false, $event)"
+    (pointercancel)="onActiveChange(false, $event)"
+    (pointerleave)="onActiveChange(false, $event)"
+    (keydown)="onKeyDown($event)"
+    (keyup)="onKeyUp($event)"
+    (blur)="onBlur($event)">
+    <span class="button__content">
+        <ng-content></ng-content>
+    </span>
+</button>

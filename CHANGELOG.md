@@ -10,6 +10,7 @@ This changelog follows a simple release-oriented format:
 ## [Unreleased]
 
 ### Added
+- Added the standalone `ButtonComponent` with variants, sizes, native button types, full-width layout, `aria-pressed` support, and hover/active interaction outputs.
 - Added the standalone `StepperComponent` with horizontal and vertical progress layouts, selectable steps, explicit step states, and configurable `pulse`, `orbit`, `glow`, and `none` current-step animations.
 - Added the standalone `DialogComponent` and exported it from the public components entrypoint.
 - Added centered modal dialog behavior with configurable title and close controls, backdrop and Escape dismissal options, and open/close transition handling.

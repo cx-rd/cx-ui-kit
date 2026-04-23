@@ -3,6 +3,7 @@
 Use this directory for consumer-facing component usage notes.
 
 Available docs:
+- [Button](./button.md): standalone button with hover and active interaction outputs
 - [Toast](./toast.md): programmatic toast service and viewport stack
 - [SelectList](./select-list.md): single or multi selection with static or async data
 - [DataTable](./data-table.md): sortable, selectable, paginated data tables
