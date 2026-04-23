@@ -10,6 +10,17 @@ This changelog follows a simple release-oriented format:
 ## [Unreleased]
 
 ### Added
+- None yet.
+
+### Changed
+- None yet.
+
+### Fixed
+- None yet.
+
+## [21.2.0] - 2026-04-23
+
+### Added
 - Added the standalone `ButtonComponent` with variants, sizes, native button types, full-width layout, `aria-pressed` support, and hover/active interaction outputs.
 - Added the standalone `StepperComponent` with horizontal and vertical progress layouts, selectable steps, explicit step states, and configurable `pulse`, `orbit`, `glow`, and `none` current-step animations.
 - Added the standalone `TimelineComponent` with stacked and alternate layouts, density modes, item states, selectable items, marker animations, and item/marker template hooks.
