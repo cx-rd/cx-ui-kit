@@ -9,6 +9,7 @@ Available docs:
 - [DataTable](./data-table.md): sortable, selectable, paginated data tables
 - [Paginator](./paginator.md): standalone pagination controls
 - [Stepper](./stepper.md): progress steps with selectable current-step animations
+- [Timeline](./timeline.md): event history, audit trails, and activity feeds
 
 Guidelines:
 - Keep `README.md` at the package root short and focused on installation plus docs entrypoints.

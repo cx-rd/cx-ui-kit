@@ -1,0 +1,108 @@
+<section
+    class="timeline"
+    [class.timeline--layout-stacked]="resolvedLayout === 'stacked'"
+    [class.timeline--layout-alternate]="resolvedLayout === 'alternate'"
+    [class.timeline--density-comfortable]="resolvedDensity === 'comfortable'"
+    [class.timeline--density-compact]="resolvedDensity === 'compact'"
+    [class.timeline--selectable]="selectable()"
+    [class.timeline--no-connectors]="!showConnectors()"
+    [class.timeline--animation-none]="resolvedMarkerAnimation === 'none'"
+    [class.timeline--animation-pulse]="resolvedMarkerAnimation === 'pulse'"
+    [class.timeline--animation-ripple]="resolvedMarkerAnimation === 'ripple'"
+    [class.timeline--animation-beam]="resolvedMarkerAnimation === 'beam'"
+    [attr.aria-label]="ariaLabel()">
+    @if (resolvedItems().length) {
+        <ol class="timeline__list" role="list">
+            @for (entry of resolvedItems(); track entry.key) {
+                <li
+                    class="timeline__entry"
+                    [class.timeline__entry--position-start]="entry.position === 'start'"
+                    [class.timeline__entry--position-end]="entry.position === 'end'"
+                    [class.timeline__entry--active]="entry.isActive"
+                    [class.timeline__entry--disabled]="entry.isDisabled"
+                    [class.timeline__entry--connector-complete]="entry.isConnectorComplete"
+                    [class.timeline__entry--status-neutral]="entry.status === 'neutral'"
+                    [class.timeline__entry--status-active]="entry.status === 'active'"
+                    [class.timeline__entry--status-complete]="entry.status === 'complete'"
+                    [class.timeline__entry--status-warning]="entry.status === 'warning'"
+                    [class.timeline__entry--status-error]="entry.status === 'error'"
+                    [class.timeline__entry--status-disabled]="entry.status === 'disabled'"
+                    [class.timeline__entry--tone-primary]="entry.tone === 'primary'"
+                    [class.timeline__entry--tone-success]="entry.tone === 'success'"
+                    [class.timeline__entry--tone-warning]="entry.tone === 'warning'"
+                    [class.timeline__entry--tone-error]="entry.tone === 'error'"
+                    [class.timeline__entry--tone-neutral]="entry.tone === 'neutral'">
+                    <div class="timeline__rail" [attr.aria-hidden]="isInteractive(entry) ? null : 'true'">
+                        @if (isInteractive(entry)) {
+                            <button
+                                type="button"
+                                class="timeline__marker"
+                                [attr.aria-current]="entry.isActive ? 'true' : null"
+                                [attr.aria-label]="entry.ariaLabel"
+                                (click)="selectItem(entry, $event)">
+                                <ng-container
+                                    *ngTemplateOutlet="markerContent; context: { $implicit: entry }">
+                                </ng-container>
+                            </button>
+                        } @else {
+                            <span
+                                class="timeline__marker"
+                                [attr.aria-current]="entry.isActive ? 'true' : null"
+                                [attr.aria-disabled]="entry.isDisabled ? 'true' : null">
+                                <ng-container
+                                    *ngTemplateOutlet="markerContent; context: { $implicit: entry }">
+                                </ng-container>
+                            </span>
+                        }
+                    </div>
+
+                    <article class="timeline__card">
+                        @if (itemTemplate(); as template) {
+                            <ng-container
+                                [ngTemplateOutlet]="template"
+                                [ngTemplateOutletContext]="entry.context">
+                            </ng-container>
+                        } @else {
+                            <div class="timeline__card-header">
+                                <div class="timeline__heading">
+                                    @if (entry.eyebrow) {
+                                        <span class="timeline__eyebrow">{{ entry.eyebrow }}</span>
+                                    }
+
+                                    <h3 class="timeline__title">{{ entry.title }}</h3>
+                                </div>
+
+                                @if (showBadges() && entry.badgeLabel) {
+                                    <span class="timeline__badge">{{ entry.badgeLabel }}</span>
+                                }
+                            </div>
+
+                            @if (showTimestamps() && entry.timestampText) {
+                                <time class="timeline__timestamp" [attr.datetime]="entry.timestampDateTime">
+                                    {{ entry.timestampText }}
+                                </time>
+                            }
+
+                            @if (showDescriptions() && entry.description) {
+                                <p class="timeline__description">{{ entry.description }}</p>
+                            }
+                        }
+                    </article>
+                </li>
+            }
+        </ol>
+    } @else {
+        <p class="timeline__empty">{{ emptyStateLabel() }}</p>
+    }
+</section>
+
+<ng-template #markerContent let-entry>
+    @if (markerTemplate(); as template) {
+        <ng-container
+            [ngTemplateOutlet]="template"
+            [ngTemplateOutletContext]="entry.context">
+        </ng-container>
+    } @else {
+        <span class="timeline__dot"></span>
+    }
+</ng-template>

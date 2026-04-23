@@ -7,3 +7,4 @@ export * from './paginator';
 export * from './data-table';
 export * from './dialog';
 export * from './stepper';
+export * from './timeline';

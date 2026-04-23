@@ -12,6 +12,7 @@ This changelog follows a simple release-oriented format:
 ### Added
 - Added the standalone `ButtonComponent` with variants, sizes, native button types, full-width layout, `aria-pressed` support, and hover/active interaction outputs.
 - Added the standalone `StepperComponent` with horizontal and vertical progress layouts, selectable steps, explicit step states, and configurable `pulse`, `orbit`, `glow`, and `none` current-step animations.
+- Added the standalone `TimelineComponent` with stacked and alternate layouts, density modes, item states, selectable items, marker animations, and item/marker template hooks.
 - Added the standalone `DialogComponent` and exported it from the public components entrypoint.
 - Added centered modal dialog behavior with configurable title and close controls, backdrop and Escape dismissal options, and open/close transition handling.
 
@@ -21,7 +22,7 @@ This changelog follows a simple release-oriented format:
 
 ### Changed
 - Simplified `DataTableComponent` bulk-selection behavior by removing the indeterminate header checkbox state.
-- Refined `DataTableComponent` sort indicators with clearer SVG-based ascending and descending icons.
+- Refined `DataTableComponent` sort indicators with a clearer SVG-based direction icon for ascending and descending states.
 - Refined the default `ToastComponent` visual theme with lighter translucent surfaces, updated borders, and softer glass treatment.
 - Updated `StepperComponent` connector progress so completed connector lines animate their filled length instead of switching color instantly.
 - Updated `StepperComponent` current marker sizing so the active step scales up and smoothly returns to its default size when another step becomes active.

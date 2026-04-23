@@ -1,8 +1,6 @@
 @use '../../core/styles/tokens' as *;
 
-$data-table-sort-icon-default: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"%3E%3Cpath d="M7%2020V5"/%3E%3Cpath d="M3%209l4-4%204%204"/%3E%3Cpath d="M17%204v15"/%3E%3Cpath d="M13%2015l4%204%204-4"/%3E%3C/svg%3E');
-$data-table-sort-icon-asc: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"%3E%3Cpath d="M3%206h10"/%3E%3Cpath d="M3%2012h10"/%3E%3Cpath d="M3%2018h10"/%3E%3Cpath d="M18%2020V5"/%3E%3Cpath d="M14%209l4-4%204%204"/%3E%3C/svg%3E');
-$data-table-sort-icon-desc: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"%3E%3Cpath d="M3%206h10"/%3E%3Cpath d="M3%2012h10"/%3E%3Cpath d="M3%2018h10"/%3E%3Cpath d="M18%204v15"/%3E%3Cpath d="M14%2015l4%204%204-4"/%3E%3C/svg%3E');
+$data-table-sort-icon: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 16 16"%3E%3Cpath d="M8 3l4 4H9v6H7V7H4z"/%3E%3C/svg%3E');
 
 :host {
     display: block;
@@ -139,8 +137,8 @@ $data-table-sort-icon-desc: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.
     transition:
         opacity 140ms ease,
         transform 140ms ease;
-    -webkit-mask: $data-table-sort-icon-default center / 18px 18px no-repeat;
-    mask: $data-table-sort-icon-default center / 18px 18px no-repeat;
+    -webkit-mask: $data-table-sort-icon center / 16px 16px no-repeat;
+    mask: $data-table-sort-icon center / 16px 16px no-repeat;
 }
 
 .data-table__sort-button:hover .data-table__sort-indicator,
@@ -154,13 +152,11 @@ $data-table-sort-icon-desc: url('data:image/svg+xml,%3Csvg xmlns="http://www.w3.
 }
 
 .data-table__sort-indicator--asc {
-    -webkit-mask-image: $data-table-sort-icon-asc;
-    mask-image: $data-table-sort-icon-asc;
+    transform: rotate(0deg);
 }
 
 .data-table__sort-indicator--desc {
-    -webkit-mask-image: $data-table-sort-icon-desc;
-    mask-image: $data-table-sort-icon-desc;
+    transform: rotate(180deg);
 }
 
 .data-table__row {

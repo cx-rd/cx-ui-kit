@@ -48,6 +48,7 @@ This single import includes:
 - [DataTable](./docs/components/data-table.md): sortable, selectable, paginated data tables
 - [Paginator](./docs/components/paginator.md): standalone pagination controls
 - [Stepper](./docs/components/stepper.md): progress steps with selectable current-step animations
+- [Timeline](./docs/components/timeline.md): event history, audit trails, and activity feeds
 
 ## Overlay Naming Convention
 
