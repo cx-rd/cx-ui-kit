@@ -7,6 +7,7 @@ Available docs:
 - [SelectList](./select-list.md): single or multi selection with static or async data
 - [DataTable](./data-table.md): sortable, selectable, paginated data tables
 - [Paginator](./paginator.md): standalone pagination controls
+- [Stepper](./stepper.md): progress steps with selectable current-step animations
 
 Guidelines:
 - Keep `README.md` at the package root short and focused on installation plus docs entrypoints.

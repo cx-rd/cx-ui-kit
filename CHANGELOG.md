@@ -10,6 +10,7 @@ This changelog follows a simple release-oriented format:
 ## [Unreleased]
 
 ### Added
+- Added the standalone `StepperComponent` with horizontal and vertical progress layouts, selectable steps, explicit step states, and configurable `pulse`, `orbit`, `glow`, and `none` current-step animations.
 - Added the standalone `DialogComponent` and exported it from the public components entrypoint.
 - Added centered modal dialog behavior with configurable title and close controls, backdrop and Escape dismissal options, and open/close transition handling.
 
@@ -21,6 +22,9 @@ This changelog follows a simple release-oriented format:
 - Simplified `DataTableComponent` bulk-selection behavior by removing the indeterminate header checkbox state.
 - Refined `DataTableComponent` sort indicators with clearer SVG-based ascending and descending icons.
 - Refined the default `ToastComponent` visual theme with lighter translucent surfaces, updated borders, and softer glass treatment.
+- Updated `StepperComponent` connector progress so completed connector lines animate their filled length instead of switching color instantly.
+- Updated `StepperComponent` current marker sizing so the active step scales up and smoothly returns to its default size when another step becomes active.
+- Smoothed `StepperComponent` marker and connector transition timing with a shared motion curve.
 - Updated collapsed toast stack styling so depth effects are applied more cleanly to the rendered toast cards.
 
 ### Fixed

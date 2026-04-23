@@ -1,0 +1,405 @@
+@use "../../core/styles/tokens" as *;
+
+:host {
+  display: block;
+  width: 100%;
+}
+
+.stepper {
+  --stepper-active-color: #{$tp-color-primary};
+  --stepper-active-dark: #{$tp-color-primary-dark};
+  --stepper-error-color: #{$tp-color-error};
+  --stepper-muted-color: #{$tp-color-secondary};
+  --stepper-line-color: #{rgba(203, 213, 225, 0.86)};
+  --stepper-motion-duration: 360ms;
+  --stepper-motion-ease: cubic-bezier(0.22, 1, 0.36, 1);
+
+  width: 100%;
+  color: $tp-color-secondary-dark;
+}
+
+.stepper__list {
+  display: flex;
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.stepper__item {
+  position: relative;
+  display: flex;
+  min-width: 0;
+}
+
+.stepper__item::before,
+.stepper__item::after {
+  position: absolute;
+  z-index: 0;
+  content: "";
+  border-radius: $tp-radius-full;
+}
+
+.stepper__item::after {
+  z-index: 0;
+  background: var(--stepper-line-color);
+}
+
+.stepper__item::before {
+  z-index: 1;
+  background: color-mix(in srgb, var(--stepper-active-color) 72%, white);
+  transition: transform 520ms var(--stepper-motion-ease);
+  will-change: transform;
+}
+
+.stepper__item--complete::before {
+  transform: scaleX(1);
+}
+
+.stepper__item:last-child::before,
+.stepper__item:last-child::after {
+  display: none;
+}
+
+.stepper__step {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  min-width: 0;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  text-align: center;
+  background: transparent;
+  border: 0;
+}
+
+button.stepper__step {
+  cursor: pointer;
+}
+
+button.stepper__step:hover .stepper__marker {
+  border-color: color-mix(in srgb, var(--stepper-active-color) 44%, white);
+  transform: translateY(-1px);
+}
+
+.stepper__item--current button.stepper__step:hover .stepper__marker {
+  transform: translateY(-1px) scale(1.14);
+}
+
+button.stepper__step:focus-visible {
+  outline: none;
+}
+
+button.stepper__step:focus-visible .stepper__marker {
+  box-shadow: $tp-shadow-focus;
+}
+
+.stepper__marker {
+  position: relative;
+  isolation: isolate;
+  display: inline-grid;
+  flex: 0 0 40px;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  color: var(--stepper-muted-color);
+  font-size: 0.88rem;
+  font-weight: 800;
+  line-height: 1;
+  background: rgba(255, 255, 255, 0.96);
+  border: 2px solid rgba(203, 213, 225, 0.95);
+  border-radius: $tp-radius-full;
+  box-shadow: $tp-shadow-sm;
+  transform: scale(1);
+  transition:
+    border-color 220ms var(--stepper-motion-ease),
+    box-shadow 220ms var(--stepper-motion-ease),
+    color 220ms var(--stepper-motion-ease),
+    transform var(--stepper-motion-duration) var(--stepper-motion-ease),
+    background-color 260ms var(--stepper-motion-ease);
+  will-change: transform;
+}
+
+.stepper__marker > * {
+  position: relative;
+  z-index: 1;
+}
+
+.stepper__body {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.stepper__label {
+  overflow: hidden;
+  color: $tp-color-secondary-dark;
+  font-size: 0.9rem;
+  font-weight: 800;
+  line-height: 1.25;
+  text-overflow: ellipsis;
+}
+
+.stepper__description {
+  overflow: hidden;
+  color: rgba(100, 116, 139, 0.92);
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+}
+
+.stepper__item--complete .stepper__marker {
+  color: white;
+  background: var(--stepper-active-color);
+  border-color: var(--stepper-active-color);
+}
+
+.stepper__item--current .stepper__marker {
+  color: var(--stepper-active-dark);
+  background: radial-gradient(
+    circle at 50% 34%,
+    rgba(255, 255, 255, 0.96),
+    rgba(240, 253, 250, 0.92)
+  );
+  border-color: var(--stepper-active-color);
+  transform: scale(1.14);
+}
+
+.stepper__item--current.stepper__item--complete .stepper__marker {
+  color: white;
+  background: var(--stepper-active-color);
+}
+
+.stepper__item--error .stepper__marker {
+  color: white;
+  background: var(--stepper-error-color);
+  border-color: var(--stepper-error-color);
+}
+
+.stepper__item--disabled {
+  color: rgba(100, 116, 139, 0.6);
+}
+
+.stepper__item--disabled .stepper__marker,
+.stepper__item--disabled .stepper__body {
+  opacity: 0.56;
+}
+
+.stepper__check {
+  width: 13px;
+  height: 8px;
+  margin-top: -2px;
+  border-bottom: 2px solid currentColor;
+  border-left: 2px solid currentColor;
+  transform: rotate(-45deg);
+}
+
+.stepper__error-mark {
+  font-size: 1rem;
+  font-weight: 900;
+}
+
+.stepper__empty {
+  padding: $tp-spacing-md;
+  margin: 0;
+  color: rgba(100, 116, 139, 0.9);
+  font-size: 0.9rem;
+  font-weight: 700;
+  text-align: center;
+  background: rgba(248, 250, 252, 0.92);
+  border: 1px dashed rgba(203, 213, 225, 0.95);
+  border-radius: $tp-radius-lg;
+}
+
+.stepper--horizontal .stepper__item {
+  flex: 1 1 0;
+  justify-content: center;
+}
+
+.stepper--horizontal .stepper__item::before,
+.stepper--horizontal .stepper__item::after {
+  top: 20px;
+  right: calc(-50% + 20px);
+  left: calc(50% + 20px);
+  height: 2px;
+}
+
+.stepper--horizontal .stepper__item::before {
+  transform: scaleX(0);
+  transform-origin: left center;
+}
+
+.stepper--horizontal .stepper__item--complete::before {
+  transform: scaleX(1);
+}
+
+.stepper--horizontal .stepper__step {
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: $tp-spacing-sm;
+}
+
+.stepper--horizontal .stepper__body {
+  align-items: center;
+  max-width: 160px;
+}
+
+.stepper--vertical .stepper__list {
+  flex-direction: column;
+  gap: $tp-spacing-lg;
+}
+
+.stepper--vertical .stepper__item::before,
+.stepper--vertical .stepper__item::after {
+  top: 42px;
+  bottom: -24px;
+  left: 19px;
+  width: 2px;
+}
+
+.stepper--vertical .stepper__item::before {
+  transform: scaleY(0);
+  transform-origin: top center;
+}
+
+.stepper--vertical .stepper__item--complete::before {
+  transform: scaleY(1);
+}
+
+.stepper--vertical .stepper__step {
+  width: 100%;
+  align-items: flex-start;
+  gap: $tp-spacing-md;
+  text-align: left;
+}
+
+.stepper--vertical .stepper__body {
+  padding-top: 3px;
+}
+
+.stepper--animation-pulse .stepper__item--current .stepper__marker::after,
+.stepper--animation-orbit .stepper__item--current .stepper__marker::after,
+.stepper--animation-glow .stepper__item--current .stepper__marker::after {
+  position: absolute;
+  content: "";
+  border-radius: $tp-radius-full;
+  pointer-events: none;
+}
+
+.stepper--animation-pulse .stepper__item--current .stepper__marker::after {
+  inset: -9px;
+  z-index: -1;
+  border: 2px solid
+    color-mix(in srgb, var(--stepper-active-color) 58%, transparent);
+  animation: stepperPulse 1.7s ease-out infinite;
+}
+
+.stepper--animation-orbit .stepper__item--current .stepper__marker::after {
+  inset: -6px;
+  z-index: -1;
+  opacity: 1;
+  background: radial-gradient(
+    circle at 35% 65%,
+    color-mix(in srgb, rgb(51, 210, 170) 100%, transparent) 0%,
+    transparent 50%
+  );
+  mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - 5px),
+    #000 calc(100% - 5px)
+  );
+  animation: stepperOrbit 2s linear infinite;
+  -webkit-mask: radial-gradient(
+    farthest-side,
+    transparent calc(100% - 3px),
+    #000 calc(100% - 3px)
+  );
+}
+
+.stepper--animation-glow .stepper__item--current .stepper__marker::after {
+  inset: -20px;
+  z-index: -1;
+  background: radial-gradient(
+    circle,
+    color-mix(in srgb, var(--stepper-active-color) 0%, transparent) 0%,
+    color-mix(in srgb, var(--stepper-active-color) 30%, transparent) 34%,
+    transparent 58%
+  );
+  animation: stepperGlow 2.2s ease-in-out infinite;
+}
+
+@keyframes stepperPulse {
+  0% {
+    opacity: 0.72;
+    transform: scale(0.78);
+  }
+
+  75%,
+  100% {
+    opacity: 0;
+    transform: scale(1.26);
+  }
+}
+
+@keyframes stepperOrbit {
+  from {
+    transform: rotate(0deg);
+  }
+
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes stepperGlow {
+  0%,
+  100% {
+    opacity: 0.5;
+    transform: scale(1);
+  }
+
+  50% {
+    opacity: 0.9;
+    transform: scale(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .stepper *,
+  .stepper *::before,
+  .stepper *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 1ms !important;
+  }
+}
+
+@media (max-width: 640px) {
+  .stepper--horizontal .stepper__list {
+    gap: $tp-spacing-sm;
+    overflow-x: auto;
+    padding-bottom: $tp-spacing-xs;
+  }
+
+  .stepper--horizontal .stepper__item {
+    min-width: 116px;
+  }
+
+  .stepper__marker {
+    flex-basis: 36px;
+    width: 36px;
+    height: 36px;
+  }
+
+  .stepper--horizontal .stepper__item::before,
+  .stepper--horizontal .stepper__item::after {
+    top: 18px;
+    right: calc(-50% + 18px);
+    left: calc(50% + 18px);
+  }
+}

@@ -47,6 +47,7 @@ This single import includes:
 - [SelectList](./docs/components/select-list.md): single or multi selection with static or async data
 - [DataTable](./docs/components/data-table.md): sortable, selectable, paginated data tables
 - [Paginator](./docs/components/paginator.md): standalone pagination controls
+- [Stepper](./docs/components/stepper.md): progress steps with selectable current-step animations
 
 ## Overlay Naming Convention
 

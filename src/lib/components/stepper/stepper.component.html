@@ -1,0 +1,68 @@
+<nav
+    class="stepper"
+    [class.stepper--horizontal]="resolvedOrientation === 'horizontal'"
+    [class.stepper--vertical]="resolvedOrientation === 'vertical'"
+    [class.stepper--selectable]="selectable()"
+    [class.stepper--animation-none]="resolvedCurrentAnimation === 'none'"
+    [class.stepper--animation-pulse]="resolvedCurrentAnimation === 'pulse'"
+    [class.stepper--animation-orbit]="resolvedCurrentAnimation === 'orbit'"
+    [class.stepper--animation-glow]="resolvedCurrentAnimation === 'glow'"
+    [attr.aria-label]="ariaLabel()">
+    @if (resolvedSteps().length) {
+        <ol class="stepper__list" role="list">
+            @for (item of resolvedSteps(); track item.key) {
+                <li
+                    class="stepper__item"
+                    [class.stepper__item--current]="item.isCurrent"
+                    [class.stepper__item--complete]="item.status === 'complete'"
+                    [class.stepper__item--error]="item.status === 'error'"
+                    [class.stepper__item--disabled]="item.isDisabled">
+                    @if (isInteractive(item)) {
+                        <button
+                            type="button"
+                            class="stepper__step"
+                            [attr.aria-current]="item.isCurrent ? 'step' : null"
+                            [attr.aria-label]="item.ariaLabel"
+                            (click)="selectStep(item)">
+                            <ng-container
+                                *ngTemplateOutlet="stepContent; context: { $implicit: item }">
+                            </ng-container>
+                        </button>
+                    } @else {
+                        <div
+                            class="stepper__step"
+                            [attr.aria-current]="item.isCurrent ? 'step' : null"
+                            [attr.aria-disabled]="item.isDisabled ? 'true' : null"
+                            [attr.aria-label]="item.ariaLabel">
+                            <ng-container
+                                *ngTemplateOutlet="stepContent; context: { $implicit: item }">
+                            </ng-container>
+                        </div>
+                    }
+                </li>
+            }
+        </ol>
+    } @else {
+        <p class="stepper__empty">No steps available.</p>
+    }
+</nav>
+
+<ng-template #stepContent let-item>
+    <span class="stepper__marker" aria-hidden="true">
+        @if (item.status === 'complete') {
+            <span class="stepper__check"></span>
+        } @else if (item.status === 'error') {
+            <span class="stepper__error-mark">!</span>
+        } @else {
+            <span>{{ item.index + 1 }}</span>
+        }
+    </span>
+
+    <span class="stepper__body">
+        <span class="stepper__label">{{ item.label }}</span>
+
+        @if (showDescriptions() && item.description) {
+            <span class="stepper__description">{{ item.description }}</span>
+        }
+    </span>
+</ng-template>
